@@ -24,14 +24,15 @@ processingInput(GLFWwindow * window)
 }
 
 GLfloat vertices[] = {
-  // First triangle.
-   0.5f,  0.5f,  0.0f,
-   0.5f, -0.5f,  0.0f,
-  -0.5f,  0.5f,  0.0f,
-  // Second triangle.
-   0.5f, -0.5f,  0.0f,
-  -0.5f, -0.5f,  0.0f,
-  -0.5f,  0.5f,  0.0f,
+   0.5f,  0.5f,  0.0f, // top right.
+   0.5f, -0.5f,  0.0f, // bottom right.
+  -0.5f, -0.5f,  0.0f, // bottom left.
+  -0.5f,  0.5f,  0.0f, // top left.
+};
+
+GLuint indices[] = {
+  0, 1, 3, // First triangle.
+  1, 2, 3, // Second triangle.
 };
 
 int
@@ -134,9 +135,16 @@ main(void)
   glDeleteShader(shader_vertex);
   glDeleteShader(shader_fragment);
 
-  GLuint VAO;
+  GLuint VAO = 0;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
+
+  GLuint EBO = 0;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(
+    GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW
+  );
 
   GLuint VBO = 0;
   glGenBuffers(1, &VBO);
@@ -155,7 +163,8 @@ main(void)
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
