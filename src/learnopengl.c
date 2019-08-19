@@ -155,6 +155,7 @@ main(void)
   glEnableVertexAttribArray(0);
 
   glUseProgram(program_shader);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);
