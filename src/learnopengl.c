@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "utils.h"
 
@@ -157,11 +158,17 @@ main(void)
   glUseProgram(program_shader);
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+  int location_vertex_color = glGetUniformLocation(program_shader, "ourColor");
+
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    float timeValue = glfwGetTime();
+    float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+    glUniform4f(location_vertex_color, 0.0f, greenValue, 0.0f, 1.0f);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

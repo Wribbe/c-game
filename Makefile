@@ -14,7 +14,7 @@ BINS=$(foreach f,${SRCS},$(patsubst ${DIR_SRC}/%.c,${DIR_BIN}/%,$f))
 
 FLAGS_C= -std=c11 -Werror -Wall --pedantic -g
 FLAGS_LD = -L/usr/local/lib64 -Lglfw/src
-FLAGS_LIBS= -lglfw3 -lrt -lm -ldl -lX11 -lpthread -lxcb -lXau -lXdmcp -lGL
+FLAGS_LIBS= -lglfw3 -lrt -lm -ldl -lX11 -lpthread -lxcb -lXau -lXdmcp -lGL -lm
 INCLUDES=  -I/usr/local/include -Iglfw/include -Iglad/include -I${DIR_LIB}
 
 all: ${BINS}
