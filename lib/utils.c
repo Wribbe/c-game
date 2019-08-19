@@ -120,3 +120,15 @@ program_create(const char * source_vertex, const char * source_fragment)
 
   return program_shader;
 }
+
+void
+shader_set_int(GLuint id, const char * name, GLint value)
+{
+  glUniform1i(glGetUniformLocation(id, name), value);
+}
+
+void
+shader_set_float(GLuint id, const char * name, GLfloat value)
+{
+  glUniform1f(glGetUniformLocation(id, name), value);
+}
