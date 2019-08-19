@@ -93,8 +93,9 @@ main(int argc, char** argv)
   if (!glfwInit()) {
     exit(EXIT_FAILURE);
   }
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
   if (!window)
   {
@@ -126,7 +127,7 @@ main(int argc, char** argv)
       NULL,
       buffer_status
     );
-    fprintf(stderr, "[Error:] %s\n", buffer_status);
+    fprintf(stderr, "[Error:] vertex shader failed: %s\n", buffer_status);
   }
   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(
@@ -144,7 +145,7 @@ main(int argc, char** argv)
       NULL,
       buffer_status
     );
-    fprintf(stderr, "[Error:] %s\n", buffer_status);
+    fprintf(stderr, "[Error:] frag shader failed: %s\n", buffer_status);
   }
   program = glCreateProgram();
   glAttachShader(program, vertex_shader);
