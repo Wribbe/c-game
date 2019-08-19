@@ -1,10 +1,3 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
 #include "utils.h"
 
 void
@@ -63,73 +56,10 @@ main(void)
 
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  GLint success = 0;
-  size_t size_buffer_log_info = 512;
-  char buffer_log_info[size_buffer_log_info];
-
-  char * source_shader_vertex = read_file("src/shaders/learnopengl.vert");
-
-  GLuint shader_vertex = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(
-    shader_vertex, 1, (const GLchar **)&source_shader_vertex, NULL
+  GLuint program_shader = program_create(
+    "src/shaders/learnopengl.vert",
+    "src/shaders/learnopengl.frag"
   );
-
-  glCompileShader(shader_vertex);
-  glGetShaderiv(shader_vertex, GL_COMPILE_STATUS, &success);
-
-  if (!success) {
-    glGetShaderInfoLog(
-        shader_vertex, size_buffer_log_info, NULL, buffer_log_info
-    );
-    fprintf(
-      stderr,
-      "[ERROR:] Vertex shader compilation failed with:\n%s\n",
-      buffer_log_info
-    );
-    return -1;
-  }
-
-  char * source_shader_fragment = read_file("src/shaders/learnopengl.frag");
-
-  GLuint shader_fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(
-    shader_fragment, 1, (const GLchar **)&source_shader_fragment, NULL
-  );
-
-  glCompileShader(shader_fragment);
-  glGetShaderiv(shader_fragment, GL_COMPILE_STATUS, &success);
-
-  if (!success) {
-    glGetShaderInfoLog(
-        shader_fragment, size_buffer_log_info, NULL, buffer_log_info
-    );
-    fprintf(
-      stderr,
-      "[ERROR:] Fragment shader compilation failed with:\n%s\n",
-      buffer_log_info
-    );
-    return -1;
-  }
-
-  GLuint program_shader = glCreateProgram();
-  glAttachShader(program_shader, shader_vertex);
-  glAttachShader(program_shader, shader_fragment);
-  glLinkProgram(program_shader);
-  glGetProgramiv(program_shader, GL_LINK_STATUS, &success);
-
-  if (!success) {
-    glGetProgramInfoLog(
-      program_shader, size_buffer_log_info, NULL, buffer_log_info
-    );
-    fprintf(stderr, "[ERROR:] Could not link the shader program.\n");
-    return -1;
-  }
-
-  free(source_shader_vertex);
-  free(source_shader_fragment);
-
-  glDeleteShader(shader_vertex);
-  glDeleteShader(shader_fragment);
 
   GLuint VAO = 0;
   glGenVertexArrays(1, &VAO);
@@ -169,6 +99,7 @@ main(void)
     glfwPollEvents();
   }
 
+  glfwDestroyWindow(window);
   glfwTerminate();
   return 0;
 }
