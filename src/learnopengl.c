@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "utils.h"
+
 void
 framebuffer_size_callback(
     GLFWwindow * window,
@@ -20,6 +22,12 @@ processingInput(GLFWwindow * window)
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 }
+
+GLfloat vertices[] = {
+  -0.5f, -0.5f,  0.0f,
+   0.5f, -0.5f,  0.0f,
+   0.5f,  0.5f,  0.0f,
+};
 
 int
 main(void)
@@ -52,6 +60,15 @@ main(void)
   glViewport(0, 0, 800, 600);
 
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+  GLuint VBO = 0;
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  char * source_shader_verex = read_file("src/shaders/learnopengl.vert");
+  char * source_shader_fragment = read_file("src/shaders/learnopengl.frag");
+
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);

@@ -6,7 +6,8 @@ DIR_BIN=bin
 DIR_OBJ=obj
 DIR_LIB=lib
 
-DEPS_EXTERNAL=glfw/src/libglfw3.a ${DIR_OBJ}/glad.o
+DEPS_EXTERNAL=\
+	glfw/src/libglfw3.a ${DIR_OBJ}/glad.o $(wildcard ${DIR_LIB}/*.c)
 
 SRCS=$(wildcard ${DIR_SRC}/*.c)
 BINS=$(foreach f,${SRCS},$(patsubst ${DIR_SRC}/%.c,${DIR_BIN}/%,$f))
