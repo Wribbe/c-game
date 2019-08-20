@@ -184,7 +184,8 @@ main(void)
 
   mat4x4_translate(view, 0.0f, 0.0f, -3.0);
   mat4x4_perspective(
-      projection, M_PI/2.0, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f
+      projection, M_PI/2.0, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
+      0.1f, 100.0f
   );
 
   GLuint location_model = glGetUniformLocation(program_shader, "model");
@@ -193,6 +194,8 @@ main(void)
     program_shader, "projection"
   );
 
+  glEnable(GL_DEPTH_TEST);
+
   glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
   glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
@@ -200,7 +203,7 @@ main(void)
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mat4x4_identity(model);
     mat4x4_rotate(model, model, 0.5f, 1.0f, 0.0f, (float)glfwGetTime() * 0.99);
