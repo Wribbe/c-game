@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "stb_image.h"
+
 char *
 read_file(const char * path_file);
 

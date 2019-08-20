@@ -1,5 +1,8 @@
 #include "utils.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 GLchar *
 read_file(const char * path_file)
 {
