@@ -98,20 +98,19 @@ main(void)
 
   glUseProgram(program_shader);
 
-  int location_vertex_color = glGetUniformLocation(program_shader, "ourColor");
+  int width, height, nrChannels;
 
-  GLuint texture = 0;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  const char * res_texture = NULL;
+  unsigned char * data = NULL;
 
+  GLuint texture1 = 0;
+  glGenTextures(1, &texture1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  int width, height, nrChannels;
-  const char * res_texture = "res/container.jpg";
-  unsigned char * data = stbi_load(
+  res_texture = "res/container.jpg";
+  data = stbi_load(
     res_texture, &width, &height, &nrChannels, 0
   );
   if (data) {
@@ -126,17 +125,13 @@ main(void)
   }
   stbi_image_free(data);
 
-  glBindTexture(GL_TEXTURE_2D, texture);
+  glUniform1i(glGetUniformLocation(program_shader, "texture1"), 0);
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    float timeValue = glfwGetTime();
-    float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-    glUniform4f(location_vertex_color, 0.0f, greenValue, 0.0f, 1.0f);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
