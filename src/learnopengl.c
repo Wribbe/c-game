@@ -18,16 +18,47 @@ processingInput(GLFWwindow * window)
 }
 
 GLfloat vertices[] = {
-  // Positions        // Texture coords.
-   0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right.
-   0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right.
-  -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left.
-  -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // top left.
-};
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-GLuint indices[] = {
-  0, 1, 2, // First triangle.
-  0, 2, 3, // Second triangle.
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
 int
@@ -73,13 +104,6 @@ main(void)
   GLuint VAO = 0;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
-
-  GLuint EBO = 0;
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW
-  );
 
   GLuint VBO = 0;
   glGenBuffers(1, &VBO);
@@ -133,6 +157,7 @@ main(void)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
   res_texture = "res/awesomeface.png";
   data = stbi_load(
     res_texture, &width, &height, &nrChannels, 0
@@ -157,7 +182,6 @@ main(void)
   mat4x4_identity(view);
   mat4x4_identity(projection);
 
-  mat4x4_rotate_X(model, model, -0.9599311);
   mat4x4_translate(view, 0.0f, 0.0f, -3.0);
   mat4x4_perspective(
       projection, M_PI/2.0, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f
@@ -169,7 +193,6 @@ main(void)
     program_shader, "projection"
   );
 
-  glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
   glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
   glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
@@ -179,6 +202,10 @@ main(void)
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    mat4x4_identity(model);
+    mat4x4_rotate(model, model, 0.5f, 1.0f, 0.0f, (float)glfwGetTime() * 0.99);
+    glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
@@ -186,7 +213,7 @@ main(void)
     glBindTexture(GL_TEXTURE_2D, texture2);
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
