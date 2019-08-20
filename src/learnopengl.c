@@ -149,18 +149,18 @@ main(void)
   glUniform1i(glGetUniformLocation(program_shader, "texture1"), 0);
   glUniform1i(glGetUniformLocation(program_shader, "texture2"), 1);
 
-  mat4x4 trans;
-  mat4x4_identity(trans);
-  mat4x4_rotate(trans, trans, 0.0f, 0.0f, 1.0f, M_PI/2.0f);
-  mat4x4_scale_aniso(trans, trans, 0.5f, 0.5f, 0.5f);
-
   GLuint location_transform = glGetUniformLocation(
     program_shader, "transform"
   );
-  glUniformMatrix4fv(location_transform, 1, GL_TRUE, &(trans[0][0]));
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);
+
+    mat4x4 trans;
+    mat4x4_identity(trans);
+    mat4x4_translate(trans, 0.5f, -0.5f, 0.0f);
+    mat4x4_rotate(trans, trans, 0.0f, 0.0f, 1.0f, (float)glfwGetTime());
+    glUniformMatrix4fv(location_transform, 1, GL_FALSE, &(trans[0][0]));
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
