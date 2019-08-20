@@ -18,11 +18,11 @@ processingInput(GLFWwindow * window)
 }
 
 GLfloat vertices[] = {
-  // Positions         // Colors         // Texture coords.
-   0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right.
-   0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right.
-  -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left.
-  -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top left.
+  // Positions        // Texture coords.
+   0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // top right.
+   0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // bottom right.
+  -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left.
+  -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // top left.
 };
 
 GLuint indices[] = {
@@ -83,18 +83,13 @@ main(void)
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), 0);
   glEnableVertexAttribArray(0);
 
   glVertexAttribPointer(
-      1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void *)(3*sizeof(float))
+      1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (void *)(3*sizeof(float))
   );
   glEnableVertexAttribArray(1);
-
-  glVertexAttribPointer(
-      2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void *)(6*sizeof(float))
-  );
-  glEnableVertexAttribArray(2);
 
   glUseProgram(program_shader);
 
@@ -153,6 +148,16 @@ main(void)
 
   glUniform1i(glGetUniformLocation(program_shader, "texture1"), 0);
   glUniform1i(glGetUniformLocation(program_shader, "texture2"), 1);
+
+  mat4x4 trans;
+  mat4x4_identity(trans);
+  mat4x4_rotate(trans, trans, 0.0f, 0.0f, 1.0f, M_PI/2.0f);
+  mat4x4_scale_aniso(trans, trans, 0.5f, 0.5f, 0.5f);
+
+  GLuint location_transform = glGetUniformLocation(
+    program_shader, "transform"
+  );
+  glUniformMatrix4fv(location_transform, 1, GL_TRUE, &(trans[0][0]));
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);

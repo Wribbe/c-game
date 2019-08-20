@@ -8,7 +8,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "linmath.h"
 #include "stb_image.h"
+
+#define M_PI 3.14159265358979323846264338327950288
 
 char *
 read_file(const char * path_file);
