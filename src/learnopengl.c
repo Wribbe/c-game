@@ -38,10 +38,13 @@ main(void)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  GLuint SCREEN_WIDTH = 800;
+  GLuint SCREEN_HEIGHT = 600;
+
   GLFWwindow * window = glfwCreateWindow(
-    800,
-    600,
-    "HELLO TRIANGLE",
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    "Learnopengl",
     NULL,
     NULL
   );
@@ -58,7 +61,7 @@ main(void)
     return -1;
   }
 
-  glViewport(0, 0, 800, 600);
+  glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -149,18 +152,29 @@ main(void)
   glUniform1i(glGetUniformLocation(program_shader, "texture1"), 0);
   glUniform1i(glGetUniformLocation(program_shader, "texture2"), 1);
 
-  GLuint location_transform = glGetUniformLocation(
-    program_shader, "transform"
+  mat4x4 model, view, projection;
+  mat4x4_identity(model);
+  mat4x4_identity(view);
+  mat4x4_identity(projection);
+
+  mat4x4_rotate_X(model, model, -0.9599311);
+  mat4x4_translate(view, 0.0f, 0.0f, -3.0);
+  mat4x4_perspective(
+      projection, M_PI/2.0, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f
   );
+
+  GLuint location_model = glGetUniformLocation(program_shader, "model");
+  GLuint location_view = glGetUniformLocation(program_shader, "view");
+  GLuint location_projection = glGetUniformLocation(
+    program_shader, "projection"
+  );
+
+  glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+  glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
+  glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);
-
-    mat4x4 trans;
-    mat4x4_identity(trans);
-    mat4x4_translate(trans, 0.5f, -0.5f, 0.0f);
-    mat4x4_rotate(trans, trans, 0.0f, 0.0f, 1.0f, (float)glfwGetTime());
-    glUniformMatrix4fv(location_transform, 1, GL_FALSE, &(trans[0][0]));
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
