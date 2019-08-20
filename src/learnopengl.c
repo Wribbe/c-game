@@ -61,6 +61,19 @@ GLfloat vertices[] = {
   -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
+vec3 positions_cubes[] = {
+  { 0.0f,  0.0f,   0.0f},
+  { 2.0f,  5.0f, -15.0f},
+  {-1.5f, -2.2f,  -2.5f},
+  {-3.8f, -2.0f, -12.3f},
+  { 2.4f, -0.4f,  -3.5f},
+  {-1.7f,  3.0f,  -7.5f},
+  { 1.3f, -2.0f,  -2.5f},
+  { 1.5f,  2.0f,  -2.5f},
+  { 1.5f,  0.2f,  -1.5f},
+  {-1.3f,  1.0f,  -1.5f}
+};
+
 int
 main(void)
 {
@@ -205,9 +218,6 @@ main(void)
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mat4x4_identity(model);
-    mat4x4_rotate(model, model, 0.5f, 1.0f, 0.0f, (float)glfwGetTime() * 0.99);
-    glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
@@ -216,7 +226,20 @@ main(void)
     glBindTexture(GL_TEXTURE_2D, texture2);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    for (int i=0; i<10; i++) {
+      mat4x4_identity(model);
+      mat4x4_translate(
+        model,
+        positions_cubes[i][0],
+        positions_cubes[i][1],
+        positions_cubes[i][2]
+      );
+      float angle = 0.45f * i;
+      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, angle);
+      glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     glfwSwapBuffers(window);
     glfwPollEvents();
