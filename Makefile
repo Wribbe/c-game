@@ -20,7 +20,7 @@ INCLUDES=  -I/usr/local/include -Iglfw/include -Iglad/include -I${DIR_LIB}
 all: ${BINS}
 
 $(DIR_BIN)/% : $(DIR_SRC)/%.c | ${DIR_BIN}
-	gcc ${filter %.c %.h,$^} -o $@ ${filter-out %.c %.h,$^} \
+	gcc ${filter %.c,$^} -o $@ ${filter-out %.c %.h,$^} \
 		${FLAGS_LIBS} ${FLAGS_C} ${INCLUDES} ${FLAGS_LD}
 
 ${BINS} : ${DEPS_EXTERNAL} $(wildcard ${DIR_LIB}/*)
