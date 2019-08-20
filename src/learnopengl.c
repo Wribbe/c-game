@@ -105,6 +105,7 @@ main(void)
 
   GLuint texture1 = 0;
   glGenTextures(1, &texture1);
+  glBindTexture(GL_TEXTURE_2D, texture1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -125,13 +126,43 @@ main(void)
   }
   stbi_image_free(data);
 
+  GLuint texture2 = 0;
+  glGenTextures(1, &texture2);
+  glBindTexture(GL_TEXTURE_2D, texture2);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  res_texture = "res/awesomeface.png";
+  data = stbi_load(
+    res_texture, &width, &height, &nrChannels, 0
+  );
+  if (data) {
+    glTexImage2D(
+      GL_TEXTURE_2D, 0, GL_RGBA, width, height,
+      0, GL_RGBA, GL_UNSIGNED_BYTE, data
+    );
+    glGenerateMipmap(GL_TEXTURE_2D);
+  } else {
+    fprintf(stderr, "Could not create texture from %s.\n", res_texture);
+    return -1;
+  }
+  stbi_image_free(data);
+
   glUniform1i(glGetUniformLocation(program_shader, "texture1"), 0);
+  glUniform1i(glGetUniformLocation(program_shader, "texture2"), 1);
 
   while (!glfwWindowShouldClose(window)) {
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
