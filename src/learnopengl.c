@@ -103,6 +103,8 @@ main(void)
   const char * res_texture = NULL;
   unsigned char * data = NULL;
 
+  stbi_set_flip_vertically_on_load(GL_TRUE);
+
   GLuint texture1 = 0;
   glGenTextures(1, &texture1);
   glBindTexture(GL_TEXTURE_2D, texture1);
