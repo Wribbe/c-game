@@ -380,6 +380,7 @@ static inline void mat4x4_perspective(mat4x4 m, float y_fov, float aspect, float
 	m[3][2] = -((2.f * f * n) / (f - n));
 	m[3][3] = 0.f;
 }
+
 static inline void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
 {
 	/* Adapted from Android's OpenGL Matrix.java.                        */

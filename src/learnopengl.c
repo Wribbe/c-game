@@ -195,7 +195,6 @@ main(void)
   mat4x4_identity(view);
   mat4x4_identity(projection);
 
-  mat4x4_translate(view, 0.0f, 0.0f, -3.0);
   mat4x4_perspective(
       projection, M_PI/2.0, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
       0.1f, 100.0f
@@ -209,7 +208,20 @@ main(void)
 
   glEnable(GL_DEPTH_TEST);
 
-  glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
+  vec3 camera_position = {0.0f, 0.0f, 3.0f};
+  vec3 camera_target = {0.0f, 0.0f, 0.0f};
+  vec3 camera_direction = {0};
+  vec3_sub(camera_direction, camera_position, camera_target);
+  vec3_norm(camera_position, camera_position);
+
+  vec3 direction_up = {0.0, 1.0f, 0.0f};
+  vec3 camera_right = {0};
+  vec3_mul_cross(camera_right, direction_up, camera_direction);
+  vec3_norm(camera_right, camera_right);
+
+  vec3 camera_up = {0};
+  vec3_mul_cross(camera_up, camera_direction, camera_right);
+
   glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
   while (!glfwWindowShouldClose(window)) {
@@ -218,12 +230,35 @@ main(void)
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
+
+    float radius = 10.0f;
+    float cam_x = sinf(glfwGetTime()) * radius;
+    float cam_z = cosf(glfwGetTime()) * radius;
+
+    camera_position[0] = cam_x;
+    camera_position[1] = 0.0f;
+    camera_position[2] = cam_z;
+
+    camera_target[0] = 0.0f;
+    camera_target[1] = 0.0f;
+    camera_target[2] = 0.0f;
+
+    camera_up[0] = 0.0f;
+    camera_up[1] = 1.0f;
+    camera_up[2] = 0.0f;
+
+    mat4x4_look_at(view,
+      camera_position,
+      camera_target,
+      camera_up
+    );
+
+    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
 
     glBindVertexArray(VAO);
     for (int i=0; i<10; i++) {
