@@ -1,5 +1,10 @@
 #include "utils.h"
 
+vec3 camera_position = {0.0f, 0.0f, 3.0f};
+vec3 camera_front = {0.0f, 0.0f, -1.0f};
+vec3 camera_up = {0.0f, 1.0f, 0.0f};
+vec3 camera_target = {0.0f, 0.0f, 0.0f};
+
 void
 framebuffer_size_callback(
     GLFWwindow * window,
@@ -15,6 +20,34 @@ processingInput(GLFWwindow * window)
   if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
+
+  float camera_speed = 0.05f;
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_scale(temp, camera_front, camera_speed);
+    vec3_add(camera_position, camera_position, temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_scale(temp, camera_front, camera_speed);
+    vec3_sub(camera_position, camera_position, temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_mul_cross(temp, camera_front, camera_up);
+    vec3_norm(temp, temp);
+    vec3_scale(temp, temp, camera_speed);
+    vec3_sub(camera_position, camera_position, temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_mul_cross(temp, camera_front, camera_up);
+    vec3_norm(temp, temp);
+    vec3_scale(temp, temp, camera_speed);
+    vec3_add(camera_position, camera_position, temp);
+  }
+
 }
 
 GLfloat vertices[] = {
@@ -208,20 +241,6 @@ main(void)
 
   glEnable(GL_DEPTH_TEST);
 
-  vec3 camera_position = {0.0f, 0.0f, 3.0f};
-  vec3 camera_target = {0.0f, 0.0f, 0.0f};
-  vec3 camera_direction = {0};
-  vec3_sub(camera_direction, camera_position, camera_target);
-  vec3_norm(camera_position, camera_position);
-
-  vec3 direction_up = {0.0, 1.0f, 0.0f};
-  vec3 camera_right = {0};
-  vec3_mul_cross(camera_right, direction_up, camera_direction);
-  vec3_norm(camera_right, camera_right);
-
-  vec3 camera_up = {0};
-  vec3_mul_cross(camera_up, camera_direction, camera_right);
-
   glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
   while (!glfwWindowShouldClose(window)) {
@@ -236,21 +255,7 @@ main(void)
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
-    float radius = 10.0f;
-    float cam_x = sinf(glfwGetTime()) * radius;
-    float cam_z = cosf(glfwGetTime()) * radius;
-
-    camera_position[0] = cam_x;
-    camera_position[1] = 0.0f;
-    camera_position[2] = cam_z;
-
-    camera_target[0] = 0.0f;
-    camera_target[1] = 0.0f;
-    camera_target[2] = 0.0f;
-
-    camera_up[0] = 0.0f;
-    camera_up[1] = 1.0f;
-    camera_up[2] = 0.0f;
+    vec3_add(camera_target, camera_position, camera_front);
 
     mat4x4_look_at(view,
       camera_position,
