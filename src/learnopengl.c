@@ -95,17 +95,17 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
   offset_y *= sensitivity;
 
   yaw += offset_x;
-  pitch += -offset_y;
+  pitch += offset_y;
 
-//  if (pitch > M_PI/2) {
-//    pitch = M_PI/2;
-//  }
-//  if (pitch < -89.0f) {
-//    pitch = -89.0f;
-//  }
+  if (pitch > 89.0f) {
+    pitch = 89.0f;
+  }
+  if (pitch < -89.0f) {
+    pitch = -89.0f;
+  }
 
-//  pitch = to_rad(pitch);
-//  yaw = to_rad(yaw);
+  pitch = to_rad(pitch);
+  yaw = to_rad(yaw);
 
   printf("pitch: %f, yaw: %f\n", pitch, yaw);
   printf("rpitch: %f, ryaw: %f\n", to_rad(pitch), to_rad(yaw));
@@ -114,7 +114,7 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
   camera_front[0] = cosf(pitch) * cosf(yaw);
   camera_front[1] = sinf(pitch);
   camera_front[2] = cosf(pitch) * sinf(yaw);
-  vec3_norm(camera_front, camera_front);
+//  vec3_norm(camera_front, camera_front);
   printf("camera_front: {%f,%f,%f}\n",
     camera_front[0],
     camera_front[1],
@@ -361,9 +361,10 @@ main(void)
     glfwPollEvents();
   }
 
-  printf("sinf(M_PI) = %f\n", sinf(90));
-
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  printf("to_rad(%f) = %f\n", 180.0f, to_rad(180.0f));
+
   return 0;
 }
