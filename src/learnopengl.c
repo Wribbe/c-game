@@ -59,6 +59,12 @@ processingInput(GLFWwindow * window)
 
 }
 
+void
+callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
+{
+  printf("Mouse @ {%f,%f}\n", pos_x, pos_y);
+}
+
 GLfloat vertices[] = {
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
    0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -251,6 +257,9 @@ main(void)
   glEnable(GL_DEPTH_TEST);
 
   glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(window, callback_mouse);
 
   while (!glfwWindowShouldClose(window)) {
 
