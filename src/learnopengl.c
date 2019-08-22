@@ -5,6 +5,10 @@ vec3 camera_front = {0.0f, 0.0f, -1.0f};
 vec3 camera_up = {0.0f, 1.0f, 0.0f};
 vec3 camera_target = {0.0f, 0.0f, 0.0f};
 
+float time_delta = 0.0f;
+float time_last_frame = 0.0f;
+float time_current = 0.0f;
+
 void
 framebuffer_size_callback(
     GLFWwindow * window,
@@ -17,11 +21,16 @@ framebuffer_size_callback(
 void
 processingInput(GLFWwindow * window)
 {
+
+  time_current = glfwGetTime();
+  time_delta = time_current - time_last_frame;
+  time_last_frame = time_current;
+
   if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
 
-  float camera_speed = 0.05f;
+  float camera_speed = 2.5f * time_delta;
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     vec3 temp = {0};
@@ -244,6 +253,7 @@ main(void)
   glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
   while (!glfwWindowShouldClose(window)) {
+
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
