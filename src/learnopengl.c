@@ -17,6 +17,8 @@ float pitch = 0.0f;
 
 GLboolean first_mouse = GL_TRUE;
 
+GLfloat fov = 45.0f;
+
 void
 callback_frabuffer_size(
     GLFWwindow * window,
@@ -71,6 +73,18 @@ float
 to_rad(float degrees)
 {
   return degrees * (M_PI/180.0f);
+}
+
+void
+callback_scroll(GLFWwindow * window, double offset_x, double offset_y)
+{
+  if (fov >= 1.0f && fov <= 45.0f) {
+    fov -= offset_y;
+  } else if (fov <= 1.0f) {
+    fov = 1.0f;
+  } else if (fov >= 45.0f) {
+    fov = 45.0f;
+  }
 }
 
 void
@@ -291,11 +305,6 @@ main(void)
   mat4x4_identity(view);
   mat4x4_identity(projection);
 
-  mat4x4_perspective(
-      projection, M_PI/2.0, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
-      0.1f, 100.0f
-  );
-
   GLuint location_model = glGetUniformLocation(program_shader, "model");
   GLuint location_view = glGetUniformLocation(program_shader, "view");
   GLuint location_projection = glGetUniformLocation(
@@ -304,10 +313,10 @@ main(void)
 
   glEnable(GL_DEPTH_TEST);
 
-  glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
-
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(window, callback_mouse);
+
+  glfwSetScrollCallback(window, callback_scroll);
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -330,7 +339,13 @@ main(void)
       camera_up
     );
 
+    mat4x4_perspective(
+        projection, to_rad(fov), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
+        0.1f, 100.0f
+    );
+
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
     glBindVertexArray(VAO);
     for (int i=0; i<10; i++) {
