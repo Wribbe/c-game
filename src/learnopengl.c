@@ -1,7 +1,26 @@
 #include "utils.h"
 
+vec3 camera_position = {0.0f, 0.0f, 3.0f};
+vec3 camera_front = {0.0f, 0.0f, -1.0f};
+vec3 camera_up = {0.0f, 1.0f, 0.0f};
+vec3 camera_target = {0.0f, 0.0f, 0.0f};
+
+float time_delta = 0.0f;
+float time_last_frame = 0.0f;
+float time_current = 0.0f;
+
+float last_x = 400;
+float last_y = 300;
+
+float yaw = 0.0f;
+float pitch = 0.0f;
+
+GLboolean first_mouse = GL_TRUE;
+
+GLfloat fov = 45.0f;
+
 void
-framebuffer_size_callback(
+callback_frabuffer_size(
     GLFWwindow * window,
     int width,
     int height)
@@ -12,9 +31,100 @@ framebuffer_size_callback(
 void
 processingInput(GLFWwindow * window)
 {
+
+  time_current = glfwGetTime();
+  time_delta = time_current - time_last_frame;
+  time_last_frame = time_current;
+
   if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
+
+  float camera_speed = 2.5f * time_delta;
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_scale(temp, camera_front, camera_speed);
+    vec3_add(camera_position, camera_position, temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_scale(temp, camera_front, camera_speed);
+    vec3_sub(camera_position, camera_position, temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_mul_cross(temp, camera_front, camera_up);
+    vec3_norm(temp, temp);
+    vec3_scale(temp, temp, camera_speed);
+    vec3_sub(camera_position, camera_position, temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    vec3 temp = {0};
+    vec3_mul_cross(temp, camera_front, camera_up);
+    vec3_norm(temp, temp);
+    vec3_scale(temp, temp, camera_speed);
+    vec3_add(camera_position, camera_position, temp);
+  }
+
+}
+
+float
+to_rad(float degrees)
+{
+  return degrees * (M_PI/180.0f);
+}
+
+void
+callback_scroll(GLFWwindow * window, double offset_x, double offset_y)
+{
+  if (fov >= 1.0f && fov <= 45.0f) {
+    fov -= offset_y;
+  } else if (fov <= 1.0f) {
+    fov = 1.0f;
+  } else if (fov >= 45.0f) {
+    fov = 45.0f;
+  }
+}
+
+void
+callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
+{
+
+  if (first_mouse) {
+    last_x = pos_x;
+    last_y = pos_y;
+    first_mouse = GL_FALSE;
+  }
+
+  float offset_x = pos_x - last_x;
+  float offset_y = last_y - pos_y;
+  last_x = pos_x;
+  last_y = pos_y;
+
+  float sensitivity = 0.05f;
+  offset_x *= sensitivity;
+  offset_y *= sensitivity;
+
+  yaw += offset_x;
+  pitch += offset_y;
+
+  if (pitch > 89.0f) {
+    pitch = 89.0f;
+  }
+  if (pitch < -89.0f) {
+    pitch = -89.0f;
+  }
+
+  GLfloat rpitch = to_rad(pitch);
+  GLfloat ryaw = to_rad(yaw);
+
+  camera_front[0] = cosf(rpitch) * cosf(ryaw);
+  camera_front[1] = sinf(rpitch);
+  camera_front[2] = cosf(rpitch) * sinf(ryaw);
+
+  vec3_norm(camera_front, camera_front);
+
 }
 
 GLfloat vertices[] = {
@@ -107,7 +217,7 @@ main(void)
 
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetFramebufferSizeCallback(window, callback_frabuffer_size);
 
   GLuint program_shader = program_create(
     "src/shaders/learnopengl.vert",
@@ -195,12 +305,6 @@ main(void)
   mat4x4_identity(view);
   mat4x4_identity(projection);
 
-  mat4x4_translate(view, 0.0f, 0.0f, -3.0);
-  mat4x4_perspective(
-      projection, M_PI/2.0, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
-      0.1f, 100.0f
-  );
-
   GLuint location_model = glGetUniformLocation(program_shader, "model");
   GLuint location_view = glGetUniformLocation(program_shader, "view");
   GLuint location_projection = glGetUniformLocation(
@@ -209,21 +313,39 @@ main(void)
 
   glEnable(GL_DEPTH_TEST);
 
-  glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
-  glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(window, callback_mouse);
+
+  glfwSetScrollCallback(window, callback_scroll);
 
   while (!glfwWindowShouldClose(window)) {
+
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
+
+    vec3_add(camera_target, camera_position, camera_front);
+
+    mat4x4_look_at(view,
+      camera_position,
+      camera_target,
+      camera_up
+    );
+
+    mat4x4_perspective(
+        projection, to_rad(fov), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
+        0.1f, 100.0f
+    );
+
+    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
     glBindVertexArray(VAO);
     for (int i=0; i<10; i++) {
@@ -247,5 +369,6 @@ main(void)
 
   glfwDestroyWindow(window);
   glfwTerminate();
+
   return 0;
 }
