@@ -18,7 +18,7 @@ float pitch = 0.0f;
 GLboolean first_mouse = GL_TRUE;
 
 void
-framebuffer_size_callback(
+callback_frabuffer_size(
     GLFWwindow * window,
     int width,
     int height)
@@ -203,7 +203,7 @@ main(void)
 
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetFramebufferSizeCallback(window, callback_frabuffer_size);
 
   GLuint program_shader = program_create(
     "src/shaders/learnopengl.vert",
@@ -354,8 +354,6 @@ main(void)
 
   glfwDestroyWindow(window);
   glfwTerminate();
-
-  printf("to_rad(%f) = %f\n", 180.0f, to_rad(180.0f));
 
   return 0;
 }
