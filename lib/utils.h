@@ -25,4 +25,13 @@ shader_set_float(GLuint id, const char * name, GLfloat value);
 GLuint
 program_create(const char * source_vertex, const char * source_fragment);
 
+typedef GLfloat m4[4][4];
+typedef GLfloat v3[3];
+
+void
+m4_scale(m4 result, m4 matrix, float value);
+
+void
+m4_translate(m4 result, m4 matrix, v3 vec);
+
 #endif

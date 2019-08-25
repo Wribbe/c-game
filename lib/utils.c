@@ -57,7 +57,7 @@ program_create(const char * source_vertex, const char * source_fragment)
   size_t size_buffer_log_info = 512;
   char buffer_log_info[size_buffer_log_info];
 
-  char * source_shader_vertex = read_file("src/shaders/learnopengl.vert");
+  char * source_shader_vertex = read_file(source_vertex);
 
   GLuint shader_vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(
@@ -79,7 +79,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     return 0;
   }
 
-  char * source_shader_fragment = read_file("src/shaders/learnopengl.frag");
+  char * source_shader_fragment = read_file(source_fragment);
 
   GLuint shader_fragment = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(
@@ -134,4 +134,21 @@ void
 shader_set_float(GLuint id, const char * name, GLfloat value)
 {
   glUniform1f(glGetUniformLocation(id, name), value);
+}
+
+void
+m4_scale(m4 result, m4 matrix, float value)
+{
+  result[0][0] = matrix[0][0] * value;
+  result[1][1] = matrix[1][1] * value;
+  result[2][2] = matrix[2][2] * value;
+  result[3][3] = 1.0f;
+}
+
+void
+m4_translate(m4 result, m4 matrix, v3 vec)
+{
+  for (int i=0; i<4; i++) {
+    result[3][i] = matrix[3][i] + vec[i];
+  }
 }
