@@ -19,6 +19,8 @@ GLboolean first_mouse = GL_TRUE;
 
 GLfloat fov = 45.0f;
 
+vec3 position_light = {1.2f, 1.0f, 2.0f};
+
 void
 callback_frabuffer_size(
     GLFWwindow * window,
@@ -128,60 +130,47 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
 }
 
 GLfloat vertices[] = {
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,
+   0.5f, -0.5f, -0.5f,
+   0.5f,  0.5f, -0.5f,
+   0.5f,  0.5f, -0.5f,
+  -0.5f,  0.5f, -0.5f,
+  -0.5f, -0.5f, -0.5f,
 
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,
+   0.5f, -0.5f,  0.5f,
+   0.5f,  0.5f,  0.5f,
+   0.5f,  0.5f,  0.5f,
+  -0.5f,  0.5f,  0.5f,
+  -0.5f, -0.5f,  0.5f,
 
-  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,
+  -0.5f,  0.5f, -0.5f,
+  -0.5f, -0.5f, -0.5f,
+  -0.5f, -0.5f, -0.5f,
+  -0.5f, -0.5f,  0.5f,
+  -0.5f,  0.5f,  0.5f,
 
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,
+   0.5f,  0.5f, -0.5f,
+   0.5f, -0.5f, -0.5f,
+   0.5f, -0.5f, -0.5f,
+   0.5f, -0.5f,  0.5f,
+   0.5f,  0.5f,  0.5f,
 
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,
+   0.5f, -0.5f, -0.5f,
+   0.5f, -0.5f,  0.5f,
+   0.5f, -0.5f,  0.5f,
+  -0.5f, -0.5f,  0.5f,
+  -0.5f, -0.5f, -0.5f,
 
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-};
-
-vec3 positions_cubes[] = {
-  { 0.0f,  0.0f,   0.0f},
-  { 2.0f,  5.0f, -15.0f},
-  {-1.5f, -2.2f,  -2.5f},
-  {-3.8f, -2.0f, -12.3f},
-  { 2.4f, -0.4f,  -3.5f},
-  {-1.7f,  3.0f,  -7.5f},
-  { 1.3f, -2.0f,  -2.5f},
-  { 1.5f,  2.0f,  -2.5f},
-  { 1.5f,  0.2f,  -1.5f},
-  {-1.3f,  1.0f,  -1.5f}
+  -0.5f,  0.5f, -0.5f,
+   0.5f,  0.5f, -0.5f,
+   0.5f,  0.5f,  0.5f,
+   0.5f,  0.5f,  0.5f,
+  -0.5f,  0.5f,  0.5f,
+  -0.5f,  0.5f, -0.5f,
 };
 
 int
@@ -219,97 +208,59 @@ main(void)
 
   glfwSetFramebufferSizeCallback(window, callback_frabuffer_size);
 
-  GLuint program_shader = program_create(
-    "src/shaders/learnopengl.vert",
-    "src/shaders/learnopengl.frag"
+  GLuint program_obj = program_create(
+    "src/shaders/obj.vert",
+    "src/shaders/obj.frag"
   );
 
-  GLuint VAO = 0;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
+  GLuint program_light = program_create(
+    "src/shaders/obj.vert",
+    "src/shaders/light.frag"
+  );
+
+  GLuint VAO_obj = 0;
+  glGenVertexArrays(1, &VAO_obj);
+  glBindVertexArray(VAO_obj);
 
   GLuint VBO = 0;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(
-      1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), (void *)(3*sizeof(float))
-  );
-  glEnableVertexAttribArray(1);
-
-  glUseProgram(program_shader);
-
-  int width, height, nrChannels;
-
-  const char * res_texture = NULL;
-  unsigned char * data = NULL;
-
-  stbi_set_flip_vertically_on_load(GL_TRUE);
-
-  GLuint texture1 = 0;
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  res_texture = "res/container.jpg";
-  data = stbi_load(
-    res_texture, &width, &height, &nrChannels, 0
-  );
-  if (data) {
-    glTexImage2D(
-      GL_TEXTURE_2D, 0, GL_RGB, width, height,
-      0, GL_RGB, GL_UNSIGNED_BYTE, data
-    );
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    fprintf(stderr, "Could not create texture from %s.\n", res_texture);
-    return -1;
-  }
-  stbi_image_free(data);
-
-  GLuint texture2 = 0;
-  glGenTextures(1, &texture2);
-  glBindTexture(GL_TEXTURE_2D, texture2);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  res_texture = "res/awesomeface.png";
-  data = stbi_load(
-    res_texture, &width, &height, &nrChannels, 0
-  );
-  if (data) {
-    glTexImage2D(
-      GL_TEXTURE_2D, 0, GL_RGBA, width, height,
-      0, GL_RGBA, GL_UNSIGNED_BYTE, data
-    );
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    fprintf(stderr, "Could not create texture from %s.\n", res_texture);
-    return -1;
-  }
-  stbi_image_free(data);
-
-  glUniform1i(glGetUniformLocation(program_shader, "texture1"), 0);
-  glUniform1i(glGetUniformLocation(program_shader, "texture2"), 1);
+  GLuint VAO_light = 0;
+  glGenVertexArrays(1, &VAO_light);
+  glBindVertexArray(VAO_light);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
+  glEnableVertexAttribArray(0);
 
   mat4x4 model, view, projection;
   mat4x4_identity(model);
   mat4x4_identity(view);
   mat4x4_identity(projection);
 
-  GLuint location_model = glGetUniformLocation(program_shader, "model");
-  GLuint location_view = glGetUniformLocation(program_shader, "view");
+  glUseProgram(program_obj);
+
+  GLuint location_model = glGetUniformLocation(program_obj, "model");
+  GLuint location_view = glGetUniformLocation(program_obj, "view");
   GLuint location_projection = glGetUniformLocation(
-    program_shader, "projection"
+    program_obj, "projection"
   );
+
+  glUseProgram(program_obj);
+
+  GLuint location_color_object = glGetUniformLocation(
+    program_obj, "color_object"
+  );
+
+  GLuint location_color_light = glGetUniformLocation(
+    program_obj, "color_light"
+  );
+
+  glUseProgram(0);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -320,16 +271,11 @@ main(void)
 
   while (!glfwWindowShouldClose(window)) {
 
+    glfwPollEvents();
     processingInput(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
 
     vec3_add(camera_target, camera_position, camera_front);
 
@@ -344,27 +290,35 @@ main(void)
         0.1f, 100.0f
     );
 
+    glUseProgram(program_obj);
+
+    glUniform3fv(location_color_object, 1, (vec3){1.0f, 0.5f, 0.31f});
+    glUniform3fv(location_color_light, 1, (vec3){1.0f, 1.0f, 1.0f});
+
+    mat4x4_identity(model);
+
+    glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
-    glBindVertexArray(VAO);
-    for (int i=0; i<10; i++) {
-      mat4x4_identity(model);
-      mat4x4_translate(
-        model,
-        positions_cubes[i][0],
-        positions_cubes[i][1],
-        positions_cubes[i][2]
-      );
-      float angle = 0.45f * i;
-      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, angle);
-      glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+    glBindVertexArray(VAO_obj);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glUseProgram(program_light);
+
+    mat4x4_identity(model);
+    m4_scale(model, model, 0.2f);
+    m4_translate(model, model, position_light);
+
+    glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+
+    glBindVertexArray(VAO_light);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glfwSwapBuffers(window);
-    glfwPollEvents();
+
   }
 
   glfwDestroyWindow(window);
