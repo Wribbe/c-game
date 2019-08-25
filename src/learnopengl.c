@@ -83,8 +83,6 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
     first_mouse = GL_FALSE;
   }
 
-  printf("x: %f y: %f\n", pos_x, pos_y);
-
   float offset_x = pos_x - last_x;
   float offset_y = last_y - pos_y;
   last_x = pos_x;
@@ -104,22 +102,15 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
     pitch = -89.0f;
   }
 
-  pitch = to_rad(pitch);
-  yaw = to_rad(yaw);
+  GLfloat rpitch = to_rad(pitch);
+  GLfloat ryaw = to_rad(yaw);
 
-  printf("pitch: %f, yaw: %f\n", pitch, yaw);
-  printf("rpitch: %f, ryaw: %f\n", to_rad(pitch), to_rad(yaw));
+  camera_front[0] = cosf(rpitch) * cosf(ryaw);
+  camera_front[1] = sinf(rpitch);
+  camera_front[2] = cosf(rpitch) * sinf(ryaw);
 
+  vec3_norm(camera_front, camera_front);
 
-  camera_front[0] = cosf(pitch) * cosf(yaw);
-  camera_front[1] = sinf(pitch);
-  camera_front[2] = cosf(pitch) * sinf(yaw);
-//  vec3_norm(camera_front, camera_front);
-  printf("camera_front: {%f,%f,%f}\n",
-    camera_front[0],
-    camera_front[1],
-    camera_front[2]
-  );
 }
 
 GLfloat vertices[] = {
