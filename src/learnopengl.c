@@ -331,6 +331,8 @@ main(void)
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
+    shader_set_v3(program_light, "color_light", color_light);
+
     glBindVertexArray(VAO_light);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
