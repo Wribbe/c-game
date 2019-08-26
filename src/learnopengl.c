@@ -12,7 +12,7 @@ float time_current = 0.0f;
 float last_x = 400;
 float last_y = 300;
 
-float yaw = 0.0f;
+float yaw = -90.0f;
 float pitch = 0.0f;
 
 GLboolean first_mouse = GL_TRUE;
