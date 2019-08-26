@@ -19,7 +19,7 @@ GLboolean first_mouse = GL_TRUE;
 
 GLfloat fov = 45.0f;
 
-vec3 position_light = {1.2f, 1.0f, 2.0f};
+vec3 position_light = {2.0f, 0.3f, 0.5f};
 
 void
 callback_frabuffer_size(
@@ -256,15 +256,17 @@ main(void)
 
   glUseProgram(program_obj);
 
-  GLuint location_color_object = glGetUniformLocation(
-    program_obj, "color_object"
-  );
-  GLuint location_color_light = glGetUniformLocation(
-    program_obj, "color_light"
-  );
-  GLuint location_position_light = glGetUniformLocation(
-    program_obj, "position_light"
-  );
+  vec3 color_diffuse = {1.0f, 0.5f, 0.31f};
+  vec3_scale(color_diffuse, color_diffuse, 0.3f);
+
+  shader_set_v3(program_obj, "position_view", camera_position);
+  shader_set_v3(program_obj, "material.ambient", color_diffuse);
+  shader_set_v3(program_obj, "material.diffuse", color_diffuse);
+  shader_set_v3(program_obj, "material.specular", (v3){0.5f, 0.5f, 0.5f});
+  shader_set_float(program_obj, "material.shininess", 32.0f);
+
+  shader_set_v3(program_obj, "light.specular", (v3){1.0f, 1.0f, 1.0f});
+  shader_set_v3(program_obj, "light.position", position_light);
 
   glUseProgram(0);
 
@@ -298,15 +300,23 @@ main(void)
 
     glUseProgram(program_obj);
 
-    glUniform3fv(location_color_object, 1, (vec3){1.0f, 0.5f, 0.31f});
-    glUniform3fv(location_color_light, 1, (vec3){1.0f, 1.0f, 1.0f});
-    glUniform3fv(location_position_light, 1, position_light);
+    shader_set_v3(program_obj, "position_view", camera_position);
 
     mat4x4_identity(model);
 
     glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+
+    v3 color_light = {
+      sinf(glfwGetTime() * 2.0f),
+      sinf(glfwGetTime() * 0.7f),
+      sinf(glfwGetTime() * 1.3f)
+    };
+    vec3_scale(color_light, color_light, 0.6f);
+
+    shader_set_v3(program_obj, "light.ambient", color_diffuse);
+    shader_set_v3(program_obj, "light.diffuse", color_light);
 
     glBindVertexArray(VAO_obj);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -320,6 +330,8 @@ main(void)
     glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+
+    shader_set_v3(program_light, "color_light", color_light);
 
     glBindVertexArray(VAO_light);
     glDrawArrays(GL_TRIANGLES, 0, 36);
