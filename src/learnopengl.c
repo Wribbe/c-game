@@ -19,7 +19,7 @@ GLboolean first_mouse = GL_TRUE;
 
 GLfloat fov = 45.0f;
 
-vec3 position_light = {1.2f, 1.0f, 2.0f};
+vec3 position_light = {1.0f, 1.0f, 1.0f};
 
 void
 callback_frabuffer_size(
@@ -266,6 +266,12 @@ main(void)
     program_obj, "position_light"
   );
 
+  shader_set_v3(program_obj, "position_view", camera_position);
+  shader_set_v3(program_obj, "material.ambient", (v3){1.0f, 0.5f, 0.31f});
+  shader_set_v3(program_obj, "material.diffuse", (v3){1.0f, 0.5f, 0.31f});
+  shader_set_v3(program_obj, "material.specular", (v3){0.5f, 0.5f, 0.5f});
+  shader_set_float(program_obj, "material.shininess", 32.0f);
+
   glUseProgram(0);
 
   glEnable(GL_DEPTH_TEST);
@@ -301,6 +307,8 @@ main(void)
     glUniform3fv(location_color_object, 1, (vec3){1.0f, 0.5f, 0.31f});
     glUniform3fv(location_color_light, 1, (vec3){1.0f, 1.0f, 1.0f});
     glUniform3fv(location_position_light, 1, position_light);
+
+    shader_set_v3(program_obj, "position_view", camera_position);
 
     mat4x4_identity(model);
 

@@ -13,6 +13,9 @@
 
 #define M_PI (float)3.14159265358979323846264338327950288
 
+typedef GLfloat m4[4][4];
+typedef GLfloat v3[3];
+
 char *
 read_file(const char * path_file);
 
@@ -22,11 +25,11 @@ shader_set_int(GLuint id, const char * name, GLint value);
 void
 shader_set_float(GLuint id, const char * name, GLfloat value);
 
+void
+shader_set_v3(GLuint id, const char * name, v3 value);
+
 GLuint
 program_create(const char * source_vertex, const char * source_fragment);
-
-typedef GLfloat m4[4][4];
-typedef GLfloat v3[3];
 
 void
 m4_scale(m4 result, m4 matrix, float value);

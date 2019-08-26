@@ -137,6 +137,12 @@ shader_set_float(GLuint id, const char * name, GLfloat value)
 }
 
 void
+shader_set_v3(GLuint id, const char * name, v3 value)
+{
+  glUniform3fv(glGetUniformLocation(id, name), 1, value);
+}
+
+void
 m4_scale(m4 result, m4 matrix, float value)
 {
   result[0][0] = matrix[0][0] * value;
