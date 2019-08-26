@@ -259,9 +259,11 @@ main(void)
   GLuint location_color_object = glGetUniformLocation(
     program_obj, "color_object"
   );
-
   GLuint location_color_light = glGetUniformLocation(
     program_obj, "color_light"
+  );
+  GLuint location_position_light = glGetUniformLocation(
+    program_obj, "position_light"
   );
 
   glUseProgram(0);
@@ -298,6 +300,7 @@ main(void)
 
     glUniform3fv(location_color_object, 1, (vec3){1.0f, 0.5f, 0.31f});
     glUniform3fv(location_color_light, 1, (vec3){1.0f, 1.0f, 1.0f});
+    glUniform3fv(location_position_light, 1, position_light);
 
     mat4x4_identity(model);
 
