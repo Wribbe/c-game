@@ -13,6 +13,8 @@
 
 #define M_PI (float)3.14159265358979323846264338327950288
 
+#define UNUSED(x) (void)x
+
 typedef GLfloat m4[4][4];
 typedef GLfloat v3[3];
 

@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "msg.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -16,11 +17,7 @@ read_file(const char * path_file)
     rewind(handler);
     buffer = malloc(sizeof(char) * size_string+1);
     if (buffer == NULL) {
-      fprintf(
-        stderr,
-        "[Error:] Could not malloc memory for file %s.\n",
-        path_file
-      );
+      ERROR("Could not malloc memory for file %s.\n", path_file);
       goto error;
     }
     size_read = fread(buffer, sizeof(char), size_string, handler);
@@ -28,15 +25,11 @@ read_file(const char * path_file)
     if (size_string != size_read) {
       free(buffer);
       buffer = NULL;
-      fprintf(
-        stderr,
-        "[Error:] Read size does not equal assumed value for: %s.\n",
-        path_file
-      );
+      ERROR("Read size does not equal assumed value for: %s.\n", path_file);
       goto error;
     }
   } else {
-    fprintf(stderr, "[Error:] No such file %s.\n", path_file);
+    ERROR("No such file %s.\n", path_file);
     goto error;
   }
 
@@ -71,11 +64,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     glGetShaderInfoLog(
         shader_vertex, size_buffer_log_info, NULL, buffer_log_info
     );
-    fprintf(
-      stderr,
-      "[ERROR:] Vertex shader compilation failed with:\n%s\n",
-      buffer_log_info
-    );
+    ERROR("Vertex shader compilation failed with:\n%s\n", buffer_log_info);
     return 0;
   }
 
@@ -93,11 +82,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     glGetShaderInfoLog(
         shader_fragment, size_buffer_log_info, NULL, buffer_log_info
     );
-    fprintf(
-      stderr,
-      "[ERROR:] Fragment shader compilation failed with:\n%s\n",
-      buffer_log_info
-    );
+    ERROR("Fragment shader compilation failed with:\n%s\n", buffer_log_info);
     return 0;
   }
 
@@ -111,7 +96,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     glGetProgramInfoLog(
       program_shader, size_buffer_log_info, NULL, buffer_log_info
     );
-    fprintf(stderr, "[ERROR:] Could not link the shader program.\n");
+    ERROR("Could not link the shader program.\n");
     return 0;
   }
 
