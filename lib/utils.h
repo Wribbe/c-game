@@ -10,6 +10,7 @@
 
 #include "linmath.h"
 #include "stb_image.h"
+#include "msg.h"
 
 #define M_PI (float)3.14159265358979323846264338327950288
 
