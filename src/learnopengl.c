@@ -21,6 +21,11 @@ GLfloat fov = 45.0f;
 
 vec3 position_light = {2.0f, 0.3f, 0.5f};
 
+float speed_camera_arrows = 0.8f;
+
+void
+camera_reorient(GLfloat offset_x, GLfloat offset_y);
+
 void
 callback_frabuffer_size(
     GLFWwindow * window,
@@ -68,7 +73,18 @@ processingInput(GLFWwindow * window)
     vec3_scale(temp, temp, camera_speed);
     vec3_add(camera_position, camera_position, temp);
   }
-
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    camera_reorient(-speed_camera_arrows, 0.0f);
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    camera_reorient(speed_camera_arrows, 0.0f);
+  }
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    camera_reorient(0.0f, speed_camera_arrows);
+  }
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    camera_reorient(0.0f, -speed_camera_arrows);
+  }
 }
 
 float
@@ -90,24 +106,8 @@ callback_scroll(GLFWwindow * window, double offset_x, double offset_y)
 }
 
 void
-callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
+camera_reorient(GLfloat offset_x, GLfloat offset_y)
 {
-
-  if (first_mouse) {
-    last_x = pos_x;
-    last_y = pos_y;
-    first_mouse = GL_FALSE;
-  }
-
-  float offset_x = pos_x - last_x;
-  float offset_y = last_y - pos_y;
-  last_x = pos_x;
-  last_y = pos_y;
-
-  float sensitivity = 0.05f;
-  offset_x *= sensitivity;
-  offset_y *= sensitivity;
-
   yaw += offset_x;
   pitch += offset_y;
 
@@ -126,7 +126,28 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
   camera_front[2] = cosf(rpitch) * sinf(ryaw);
 
   vec3_norm(camera_front, camera_front);
+}
 
+void
+callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
+{
+
+  if (first_mouse) {
+    last_x = pos_x;
+    last_y = pos_y;
+    first_mouse = GL_FALSE;
+  }
+
+  float offset_x = pos_x - last_x;
+  float offset_y = last_y - pos_y;
+  last_x = pos_x;
+  last_y = pos_y;
+
+  float sensitivity = 0.05f;
+  offset_x *= sensitivity;
+  offset_y *= sensitivity;
+
+  camera_reorient(offset_x, offset_y);
 }
 
 GLfloat vertices[] = {
