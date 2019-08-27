@@ -286,16 +286,12 @@ main(void)
   vec3_scale(color_diffuse, color_diffuse, 0.3f);
 
   shader_set_v3(program_obj, "position_view", camera_position);
-  shader_set_v3(program_obj, "material.ambient", color_diffuse);
-  shader_set_v3(program_obj, "material.diffuse", color_diffuse);
-  shader_set_v3(program_obj, "material.specular", (v3){0.5f, 0.5f, 0.5f});
   shader_set_float(program_obj, "material.shininess", 32.0f);
 
-  shader_set_v3(program_obj, "light.specular", (v3){1.0f, 1.0f, 1.0f});
   shader_set_v3(program_obj, "light.position", position_light);
 
-  GLuint texture_1 = texture_load("res/container2.png");
-  glBindTexture(GL_TEXTURE_2D, texture_1);
+  GLuint texture_diffuse = texture_load("res/container2.png");
+  GLuint texture_specular = texture_load("res/container2_specular.png");
 
   glUseProgram(0);
 
@@ -342,12 +338,22 @@ main(void)
       sinf(glfwGetTime() * 0.7f),
       sinf(glfwGetTime() * 1.3f)
     };
-    vec3_scale(color_light, color_light, 0.6f);
-
+    shader_set_v3(program_obj, "light.specular", color_light);
     shader_set_v3(program_obj, "light.ambient", color_diffuse);
+
+    vec3_scale(color_light, color_light, 0.6f);
     shader_set_v3(program_obj, "light.diffuse", color_light);
 
     glBindVertexArray(VAO_obj);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_diffuse);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture_specular);
+
+    shader_set_int(program_obj, "material.diffuse", 0);
+    shader_set_int(program_obj, "material.specular", 1);
+
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glUseProgram(program_light);
