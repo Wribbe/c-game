@@ -299,7 +299,7 @@ main(void)
   shader_set_float(program_obj, "light.linear", 0.09f);
   shader_set_float(program_obj, "light.quadratic", 0.032f);
 
-  shader_set_v3(program_obj, "light.position", position_light);
+  shader_set_float(program_obj, "light.cutoff", cosf(to_rad(12.5f)));
 
   GLuint texture_diffuse = texture_load("res/container2.png");
   GLuint texture_specular = texture_load("res/container2_specular.png");
@@ -357,6 +357,8 @@ main(void)
 
     shader_set_int(program_obj, "material.diffuse", 0);
     shader_set_int(program_obj, "material.specular", 1);
+    shader_set_v3(program_obj, "light.position", camera_position);
+    shader_set_v3(program_obj, "light.direction", camera_front);
 
     for (int i=0; i<10; i++) {
       mat4x4_identity(model);
