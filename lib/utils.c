@@ -138,7 +138,7 @@ m4_scale(m4 result, m4 matrix, float value)
 void
 m4_translate(m4 result, m4 matrix, v3 vec)
 {
-  for (int i=0; i<4; i++) {
+  for (int i=0; i<3; i++) {
     result[3][i] = matrix[3][i] + vec[i];
   }
 }
