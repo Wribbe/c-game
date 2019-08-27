@@ -39,4 +39,7 @@ m4_scale(m4 result, m4 matrix, float value);
 void
 m4_translate(m4 result, m4 matrix, v3 vec);
 
+GLuint
+texture_load(const char * path_file);
+
 #endif
