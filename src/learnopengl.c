@@ -19,7 +19,7 @@ GLboolean first_mouse = GL_TRUE;
 
 GLfloat fov = 45.0f;
 
-vec3 direction_light = {-0.2f, -1.0f, 0.3f};
+vec3 position_light = {1.0f, 3.0f, 0.4f};
 
 float speed_camera_arrows = 0.8f;
 
@@ -291,12 +291,15 @@ main(void)
   glUseProgram(program_obj);
 
   vec3 color_diffuse = {1.0f, 0.5f, 0.31f};
-  vec3_scale(color_diffuse, color_diffuse, 0.3f);
+  vec3_scale(color_diffuse, color_diffuse, 0.2f);
 
   shader_set_v3(program_obj, "position_view", camera_position);
   shader_set_float(program_obj, "material.shininess", 32.0f);
+  shader_set_float(program_obj, "light.constant", 1.0f);
+  shader_set_float(program_obj, "light.linear", 0.09f);
+  shader_set_float(program_obj, "light.quadratic", 0.032f);
 
-  shader_set_v3(program_obj, "light.direction", direction_light);
+  shader_set_v3(program_obj, "light.position", position_light);
 
   GLuint texture_diffuse = texture_load("res/container2.png");
   GLuint texture_specular = texture_load("res/container2_specular.png");
@@ -315,7 +318,7 @@ main(void)
     glfwPollEvents();
     processingInput(window);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     vec3_add(camera_target, camera_position, camera_front);
@@ -342,7 +345,7 @@ main(void)
     shader_set_v3(program_obj, "light.specular", color_light);
     shader_set_v3(program_obj, "light.ambient", color_diffuse);
 
-    vec3_scale(color_light, color_light, 0.3f);
+    vec3_scale(color_light, color_light, 0.8f);
     shader_set_v3(program_obj, "light.diffuse", color_light);
 
     glBindVertexArray(VAO_obj);
