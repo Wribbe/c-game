@@ -300,6 +300,7 @@ main(void)
   shader_set_float(program_obj, "light.quadratic", 0.032f);
 
   shader_set_float(program_obj, "light.cutoff", cosf(to_rad(12.5f)));
+  shader_set_float(program_obj, "light.outercutoff", cosf(to_rad(17.5f)));
 
   GLuint texture_diffuse = texture_load("res/container2.png");
   GLuint texture_specular = texture_load("res/container2_specular.png");
