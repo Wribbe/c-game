@@ -16,11 +16,7 @@ read_file(const char * path_file)
     rewind(handler);
     buffer = malloc(sizeof(char) * size_string+1);
     if (buffer == NULL) {
-      fprintf(
-        stderr,
-        "[Error:] Could not malloc memory for file %s.\n",
-        path_file
-      );
+      ERROR("Could not malloc memory for file %s.\n", path_file);
       goto error;
     }
     size_read = fread(buffer, sizeof(char), size_string, handler);
@@ -28,15 +24,11 @@ read_file(const char * path_file)
     if (size_string != size_read) {
       free(buffer);
       buffer = NULL;
-      fprintf(
-        stderr,
-        "[Error:] Read size does not equal assumed value for: %s.\n",
-        path_file
-      );
+      ERROR("Read size does not equal assumed value for: %s.\n", path_file);
       goto error;
     }
   } else {
-    fprintf(stderr, "[Error:] No such file %s.\n", path_file);
+    ERROR("No such file %s.\n", path_file);
     goto error;
   }
 
@@ -71,11 +63,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     glGetShaderInfoLog(
         shader_vertex, size_buffer_log_info, NULL, buffer_log_info
     );
-    fprintf(
-      stderr,
-      "[ERROR:] Vertex shader compilation failed with:\n%s\n",
-      buffer_log_info
-    );
+    ERROR("Vertex shader compilation failed with:\n%s\n", buffer_log_info);
     return 0;
   }
 
@@ -93,11 +81,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     glGetShaderInfoLog(
         shader_fragment, size_buffer_log_info, NULL, buffer_log_info
     );
-    fprintf(
-      stderr,
-      "[ERROR:] Fragment shader compilation failed with:\n%s\n",
-      buffer_log_info
-    );
+    ERROR("Fragment shader compilation failed with:\n%s\n", buffer_log_info);
     return 0;
   }
 
@@ -111,7 +95,7 @@ program_create(const char * source_vertex, const char * source_fragment)
     glGetProgramInfoLog(
       program_shader, size_buffer_log_info, NULL, buffer_log_info
     );
-    fprintf(stderr, "[ERROR:] Could not link the shader program.\n");
+    ERROR("Could not link the shader program.\n");
     return 0;
   }
 
@@ -157,4 +141,40 @@ m4_translate(m4 result, m4 matrix, v3 vec)
   for (int i=0; i<4; i++) {
     result[3][i] = matrix[3][i] + vec[i];
   }
+}
+
+
+GLuint
+texture_load(const char * path_file)
+{
+  int width, height, nrChannels;
+  unsigned char * data = stbi_load(
+    path_file,
+    &width,
+    &height,
+    &nrChannels,
+    0
+  );
+
+  if (!data) {
+    ERROR("No such file for texture data: %s\n", path_file);
+    return 0;
+  }
+
+  GLuint id_texture = 0;
+  glGenTextures(1, &id_texture);
+  glBindTexture(GL_TEXTURE_2D, id_texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA,
+    GL_UNSIGNED_BYTE, data);
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  stbi_image_free(data);
+
+  return id_texture;
 }

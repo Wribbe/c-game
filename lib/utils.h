@@ -10,8 +10,11 @@
 
 #include "linmath.h"
 #include "stb_image.h"
+#include "msg.h"
 
 #define M_PI (float)3.14159265358979323846264338327950288
+
+#define UNUSED(x) (void)x
 
 typedef GLfloat m4[4][4];
 typedef GLfloat v3[3];
@@ -36,5 +39,8 @@ m4_scale(m4 result, m4 matrix, float value);
 
 void
 m4_translate(m4 result, m4 matrix, v3 vec);
+
+GLuint
+texture_load(const char * path_file);
 
 #endif

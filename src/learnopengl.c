@@ -21,6 +21,11 @@ GLfloat fov = 45.0f;
 
 vec3 position_light = {2.0f, 0.3f, 0.5f};
 
+float speed_camera_arrows = 0.8f;
+
+void
+camera_reorient(GLfloat offset_x, GLfloat offset_y);
+
 void
 callback_frabuffer_size(
     GLFWwindow * window,
@@ -68,7 +73,18 @@ processingInput(GLFWwindow * window)
     vec3_scale(temp, temp, camera_speed);
     vec3_add(camera_position, camera_position, temp);
   }
-
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    camera_reorient(-speed_camera_arrows, 0.0f);
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    camera_reorient(speed_camera_arrows, 0.0f);
+  }
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    camera_reorient(0.0f, speed_camera_arrows);
+  }
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    camera_reorient(0.0f, -speed_camera_arrows);
+  }
 }
 
 float
@@ -90,24 +106,8 @@ callback_scroll(GLFWwindow * window, double offset_x, double offset_y)
 }
 
 void
-callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
+camera_reorient(GLfloat offset_x, GLfloat offset_y)
 {
-
-  if (first_mouse) {
-    last_x = pos_x;
-    last_y = pos_y;
-    first_mouse = GL_FALSE;
-  }
-
-  float offset_x = pos_x - last_x;
-  float offset_y = last_y - pos_y;
-  last_x = pos_x;
-  last_y = pos_y;
-
-  float sensitivity = 0.05f;
-  offset_x *= sensitivity;
-  offset_y *= sensitivity;
-
   yaw += offset_x;
   pitch += offset_y;
 
@@ -126,51 +126,73 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
   camera_front[2] = cosf(rpitch) * sinf(ryaw);
 
   vec3_norm(camera_front, camera_front);
+}
 
+void
+callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
+{
+
+  if (first_mouse) {
+    last_x = pos_x;
+    last_y = pos_y;
+    first_mouse = GL_FALSE;
+  }
+
+  float offset_x = pos_x - last_x;
+  float offset_y = last_y - pos_y;
+  last_x = pos_x;
+  last_y = pos_y;
+
+  float sensitivity = 0.05f;
+  offset_x *= sensitivity;
+  offset_y *= sensitivity;
+
+  camera_reorient(offset_x, offset_y);
 }
 
 GLfloat vertices[] = {
-  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+  // positions          // normals           // texture coords
+  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+   0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-  -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-  -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
 int
@@ -227,18 +249,22 @@ main(void)
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(
-    1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(3*sizeof(GLfloat))
+    1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)(3*sizeof(GLfloat))
   );
   glEnableVertexAttribArray(1);
+  glVertexAttribPointer(
+    2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)(6*sizeof(GLfloat))
+  );
+  glEnableVertexAttribArray(2);
 
   GLuint VAO_light = 0;
   glGenVertexArrays(1, &VAO_light);
   glBindVertexArray(VAO_light);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
   glEnableVertexAttribArray(0);
 
   mat4x4 model, view, projection;
@@ -260,13 +286,12 @@ main(void)
   vec3_scale(color_diffuse, color_diffuse, 0.3f);
 
   shader_set_v3(program_obj, "position_view", camera_position);
-  shader_set_v3(program_obj, "material.ambient", color_diffuse);
-  shader_set_v3(program_obj, "material.diffuse", color_diffuse);
-  shader_set_v3(program_obj, "material.specular", (v3){0.5f, 0.5f, 0.5f});
   shader_set_float(program_obj, "material.shininess", 32.0f);
 
-  shader_set_v3(program_obj, "light.specular", (v3){1.0f, 1.0f, 1.0f});
   shader_set_v3(program_obj, "light.position", position_light);
+
+  GLuint texture_diffuse = texture_load("res/container2.png");
+  GLuint texture_specular = texture_load("res/container2_specular.png");
 
   glUseProgram(0);
 
@@ -313,12 +338,22 @@ main(void)
       sinf(glfwGetTime() * 0.7f),
       sinf(glfwGetTime() * 1.3f)
     };
-    vec3_scale(color_light, color_light, 0.6f);
-
+    shader_set_v3(program_obj, "light.specular", color_light);
     shader_set_v3(program_obj, "light.ambient", color_diffuse);
+
+    vec3_scale(color_light, color_light, 0.6f);
     shader_set_v3(program_obj, "light.diffuse", color_light);
 
     glBindVertexArray(VAO_obj);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_diffuse);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture_specular);
+
+    shader_set_int(program_obj, "material.diffuse", 0);
+    shader_set_int(program_obj, "material.specular", 1);
+
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glUseProgram(program_light);
