@@ -19,7 +19,7 @@ GLboolean first_mouse = GL_TRUE;
 
 GLfloat fov = 45.0f;
 
-vec3 position_light = {2.0f, 0.3f, 0.5f};
+vec3 direction_light = {-0.2f, -1.0f, 0.3f};
 
 float speed_camera_arrows = 0.8f;
 
@@ -195,6 +195,19 @@ GLfloat vertices[] = {
   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
+v3 positions_cube[] = {
+  { 0.0f,  0.0f,  0.0f},
+  { 2.0f,  5.0f, -15.0f},
+  {-1.5f, -2.2f, -2.5f},
+  {-3.8f, -2.0f, -12.3f},
+  { 2.4f, -0.4f, -3.5f},
+  {-1.7f,  3.0f, -7.5f},
+  { 1.3f, -2.0f, -2.5f},
+  { 1.5f,  2.0f, -2.5f},
+  { 1.5f,  0.2f, -1.5f},
+  {-1.3f,  1.0f, -1.5f}
+};
+
 int
 main(void)
 {
@@ -233,11 +246,6 @@ main(void)
   GLuint program_obj = program_create(
     "src/shaders/obj.vert",
     "src/shaders/obj.frag"
-  );
-
-  GLuint program_light = program_create(
-    "src/shaders/obj.vert",
-    "src/shaders/light.frag"
   );
 
   GLuint VAO_obj = 0;
@@ -288,7 +296,7 @@ main(void)
   shader_set_v3(program_obj, "position_view", camera_position);
   shader_set_float(program_obj, "material.shininess", 32.0f);
 
-  shader_set_v3(program_obj, "light.position", position_light);
+  shader_set_v3(program_obj, "light.direction", direction_light);
 
   GLuint texture_diffuse = texture_load("res/container2.png");
   GLuint texture_specular = texture_load("res/container2_specular.png");
@@ -319,29 +327,22 @@ main(void)
     );
 
     mat4x4_perspective(
-        projection, to_rad(fov), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
-        0.1f, 100.0f
+      projection, to_rad(fov), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
+      0.1f, 100.0f
     );
 
     glUseProgram(program_obj);
 
     shader_set_v3(program_obj, "position_view", camera_position);
 
-    mat4x4_identity(model);
-
-    glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
 
-    v3 color_light = {
-      sinf(glfwGetTime() * 2.0f),
-      sinf(glfwGetTime() * 0.7f),
-      sinf(glfwGetTime() * 1.3f)
-    };
+    v3 color_light = {1.0f, 1.0f, 1.0f};
     shader_set_v3(program_obj, "light.specular", color_light);
     shader_set_v3(program_obj, "light.ambient", color_diffuse);
 
-    vec3_scale(color_light, color_light, 0.6f);
+    vec3_scale(color_light, color_light, 0.3f);
     shader_set_v3(program_obj, "light.diffuse", color_light);
 
     glBindVertexArray(VAO_obj);
@@ -354,25 +355,15 @@ main(void)
     shader_set_int(program_obj, "material.diffuse", 0);
     shader_set_int(program_obj, "material.specular", 1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    glUseProgram(program_light);
-
-    mat4x4_identity(model);
-    m4_scale(model, model, 0.2f);
-    m4_translate(model, model, position_light);
-
-    glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
-    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
-    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
-
-    shader_set_v3(program_light, "color_light", color_light);
-
-    glBindVertexArray(VAO_light);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
+    for (int i=0; i<10; i++) {
+      mat4x4_identity(model);
+      m4_translate(model, model, positions_cube[i]);
+      float angle = 20.0f * i;
+      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
+      glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
     glfwSwapBuffers(window);
-
   }
 
   glfwDestroyWindow(window);
