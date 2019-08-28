@@ -23,6 +23,8 @@ vec3 position_light = {1.0f, 3.0f, 0.4f};
 
 float speed_camera_arrows = 0.8f;
 
+#define NR_POINT_LIGHTS 4
+
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
 
@@ -208,6 +210,13 @@ v3 positions_cube[] = {
   {-1.3f,  1.0f, -1.5f}
 };
 
+v3 positions_light_point[] = {
+  { 0.7f,  0.2f,  2.0f},
+  { 2.3f, -3.3f, -4.0f},
+  {-4.0f,  2.0f, -12.0f},
+  { 0.0f,  0.0f, -3.0f}
+};
+
 int
 main(void)
 {
@@ -246,6 +255,11 @@ main(void)
   GLuint program_obj = program_create(
     "src/shaders/obj.vert",
     "src/shaders/obj.frag"
+  );
+
+  GLuint program_lamp = program_create(
+    "src/shaders/obj.vert",
+    "src/shaders/light.frag"
   );
 
   GLuint VAO_obj = 0;
@@ -288,8 +302,6 @@ main(void)
     program_obj, "projection"
   );
 
-  glUseProgram(program_obj);
-
   vec3 color_diffuse = {1.0f, 0.5f, 0.31f};
   vec3_scale(color_diffuse, color_diffuse, 0.2f);
 
@@ -304,6 +316,33 @@ main(void)
 
   GLuint texture_diffuse = texture_load("res/container2.png");
   GLuint texture_specular = texture_load("res/container2_specular.png");
+
+  shader_set_v3(program_obj, "light_directional.direction", (v3){-0.2f, -1.0f, -0.3f});
+  shader_set_v3(program_obj, "light_directional.ambient", (v3){0.05f, 0.05f, 0.05f});
+  shader_set_v3(program_obj, "light_directional.diffuse", (v3){0.4f, 0.4f, 0.4f});
+  shader_set_v3(program_obj, "light_directional.specular", (v3){0.5f, 0.5f, 0.5f});
+
+  for (int i=0; i<NR_POINT_LIGHTS; i++) {
+    shader_set_v3(program_obj,
+      uniformf("lights_point[%d].position", i),
+      positions_light_point[i]
+    );
+    shader_set_v3(program_obj,
+      uniformf("lights_point[%d].ambient", i),
+      (v3){0.05f, 0.05f, 0.05f}
+    );
+    shader_set_v3(program_obj,
+      uniformf("lights_point[%d].diffuse", i),
+      (v3){0.8f, 0.8f, 0.8f}
+    );
+    shader_set_v3(program_obj,
+      uniformf("lights_point[%d].specular", i),
+      (v3){1.0f, 1.0f, 1.0f}
+    );
+    shader_set_float(program_obj, uniformf("lights_point[%d].constant", i), 1.0f);
+    shader_set_float(program_obj, uniformf("lights_point[%d].linear", i), 0.09f);
+    shader_set_float(program_obj, uniformf("lights_point[%d].quadratic", i), 0.032f);
+  }
 
   glUseProgram(0);
 
@@ -369,6 +408,26 @@ main(void)
       glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+
+    glUseProgram(program_lamp);
+
+    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+
+    for (int i=0; i<NR_POINT_LIGHTS; i++) {
+      mat4x4_identity(model);
+      m4_scale(model, model, 0.2f);
+      m4_translate(model, model, positions_light_point[i]);
+      glUniformMatrix4fv(
+          glGetUniformLocation(program_lamp, "model"),
+          1,
+          GL_FALSE,
+          &model[0][0]
+      );
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    glUseProgram(0);
     glfwSwapBuffers(window);
   }
 
