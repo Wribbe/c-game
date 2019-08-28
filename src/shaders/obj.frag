@@ -14,6 +14,18 @@ struct LightDirectional {
   vec3 specular;
 };
 
+struct LightPoint {
+  vec3 position;
+
+  float constant;
+  float linear;
+  float quadratic;
+
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+};
+
 
 in vec3 Normal;
 in vec3 position_frag;
@@ -26,6 +38,8 @@ uniform vec3 position_view;
 uniform Material material;
 
 uniform LightDirectional light_directional;
+#define NR_POINT_LIGHTS 4
+uniform LightPoint lights_point[NR_POINT_LIGHTS];
 
 vec3
 calculate_light_directional(
@@ -43,6 +57,35 @@ calculate_light_directional(
   vec3 ambient = light.ambient * vec3(texture(material.diffuse, coords_tex));
   vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, coords_tex));
   vec3 specular = light.specular * spec * vec3(texture(material.specular, coords_tex));
+
+  return (ambient + diffuse + specular);
+}
+
+vec3
+calculate_light_point(
+  LightPoint light,
+  vec3 normal,
+  vec3 position_frag,
+  vec3 view_direction)
+{
+  vec3 direction_light = normalize(light.position - position_frag);
+  // Diffuse shading.
+  float diff = max(dot(normal, direction_light), 0.0f);
+  // Specular shading.
+  vec3 direction_reflect = reflect(-direction_light, normal);
+  float spec = pow(max(dot(direction_view, direction_reflect), 0.0f), material.shininess);
+  // Attenuation.
+  float dist = length(light.position - position_frag);
+  float attenuation = 1.0f / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
+
+  // Combine results.
+  vec3 ambient = light.ambiet * vec3(texture(material.diffuse, coords_tex));
+  vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, coords_tex));
+  vec3 specular = light.specular * spec * vec3(texture(material.specular, coords_tex));
+
+  ambient *= attenuation;
+  diffuse *= attenuation;
+  specular *= attenuation;
 
   return (ambient + diffuse + specular);
 }
