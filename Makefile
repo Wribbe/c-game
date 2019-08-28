@@ -1,5 +1,6 @@
 URL_GIT_GLFW=https://github.com/glfw/glfw.git
 URL_GIT_GLAD=https://github.com/Dav1dde/glad.git
+URL_GIT_CGLTF=https://github.com/jkuhlmann/cgltf
 
 DIR_SRC=src
 DIR_BIN=bin
@@ -7,7 +8,7 @@ DIR_OBJ=obj
 DIR_LIB=lib
 
 DEPS_EXTERNAL=\
-	glfw/src/libglfw3.a ${DIR_OBJ}/glad.o $(wildcard ${DIR_LIB}/*.c)
+	glfw/src/libglfw3.a ${DIR_OBJ}/glad.o $(wildcard ${DIR_LIB}/*.c) cgltf/cgltf.h
 
 SRCS=$(wildcard ${DIR_SRC}/*.c)
 BINS=$(foreach f,${SRCS},$(patsubst ${DIR_SRC}/%.c,${DIR_BIN}/%,$f))
@@ -15,7 +16,7 @@ BINS=$(foreach f,${SRCS},$(patsubst ${DIR_SRC}/%.c,${DIR_BIN}/%,$f))
 FLAGS_C= -std=c11 -Werror -Wall --pedantic -g
 FLAGS_LD = -L/usr/local/lib64 -Lglfw/src
 FLAGS_LIBS= -lglfw3 -lrt -lm -ldl -lX11 -lpthread -lxcb -lXau -lXdmcp -lGL -lm
-INCLUDES=  -I/usr/local/include -Iglfw/include -Iglad/include -I${DIR_LIB}
+INCLUDES=  -I/usr/local/include -Iglfw/include -Iglad/include -I${DIR_LIB} -Icgltf
 
 all: ${BINS}
 
@@ -32,7 +33,10 @@ glfw:
 	git clone ${URL_GIT_GLFW} $@
 
 glad:
-	git clone ${URL_GIT_GLAD}
+	git clone ${URL_GIT_GLAD} $@
+
+cgltf/%:
+	git clone ${URL_GIT_CGLTF} $@
 
 %/glad.c : glad
 	cd $^ && python -m glad --generator=c --out-path=.

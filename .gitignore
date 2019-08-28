@@ -2,3 +2,4 @@ glfw
 bin
 glad
 obj
+cgltf
