@@ -6,16 +6,14 @@ struct Material {
   float shininess;
 };
 
-struct Light {
-  vec3 position;
+struct LightDirectional {
   vec3 direction;
-  float cutoff;
-  float outercutoff;
 
   vec3 ambient;
   vec3 diffuse;
   vec3 specular;
 };
+
 
 in vec3 Normal;
 in vec3 position_frag;
@@ -26,7 +24,28 @@ out vec4 FragColor;
 uniform vec3 position_view;
 
 uniform Material material;
-uniform Light light;
+
+uniform LightDirectional light_directional;
+
+vec3
+calculate_light_directional(
+  LightDirectional light,
+  vec3 normal,
+  vec3 direction_view)
+{
+  vec3 direction_light = normalize(-light.direction);
+  // Diffuse shading.
+  float diff = max(dot(normal, direction_light), 0.0f);
+  // Specular shading.
+  vec3 direction_reflect = reflect(-direction_light, normal);
+  float spec = pow(max(dot(direction_view, direction_reflect), 0.0f), material.shininess);
+  // Combine results.
+  vec3 ambient = light.ambient * vec3(texture(material.diffuse, coords_tex));
+  vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, coords_tex));
+  vec3 specular = light.specular * spec * vec3(texture(material.specular, coords_tex));
+
+  return (ambient + diffuse + specular);
+}
 
 void main()
 {
