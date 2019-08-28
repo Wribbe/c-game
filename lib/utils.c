@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
+
 GLchar *
 read_file(const char * path_file)
 {
@@ -177,4 +179,14 @@ texture_load(const char * path_file)
   stbi_image_free(data);
 
   return id_texture;
+}
+
+char *
+uniformf(const char * fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(BUFFER_CHAR, SIZE_BUFFER_CHAR, fmt, args);
+  va_end(args);
+  return BUFFER_CHAR;
 }

@@ -19,6 +19,12 @@
 typedef GLfloat m4[4][4];
 typedef GLfloat v3[3];
 
+#define SIZE_BUFFER_CHAR 512
+extern char BUFFER_CHAR[];
+
+char *
+uniformf(const char * fmt, ...);
+
 char *
 read_file(const char * path_file);
 
