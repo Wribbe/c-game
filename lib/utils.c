@@ -1,7 +1,7 @@
-#include "utils.h"
-
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#define CGLTF_IMPLEMENTATION
+
+#include "utils.h"
 
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
 
