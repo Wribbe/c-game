@@ -23,6 +23,9 @@ typedef GLfloat v3[3];
 #define SIZE_BUFFER_CHAR 512
 extern char BUFFER_CHAR[];
 
+#define PATH_MODELS_SAMPLE "res/samples/2.0"
+#define RES(x) PATH_MODELS_SAMPLE"/"x"/glTF/"x".gltf"
+
 char *
 uniformf(const char * fmt, ...);
 

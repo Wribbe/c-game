@@ -152,51 +152,6 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
   camera_reorient(offset_x, offset_y);
 }
 
-GLfloat vertices[] = {
-  // positions          // normals           // texture coords
-  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-   0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-};
-
 v3 positions_cube[] = {
   { 0.0f,  0.0f,  0.0f},
   { 2.0f,  5.0f, -15.0f},
@@ -262,30 +217,75 @@ main(void)
     "src/shaders/light.frag"
   );
 
-  GLuint VAO_obj = 0;
-  glGenVertexArrays(1, &VAO_obj);
-  glBindVertexArray(VAO_obj);
+  cgltf_options options = {0};
+  cgltf_data * data = NULL;
+  cgltf_result result = {0};
 
-  GLuint VBO = 0;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  const char * path_model = RES("Box");
+  result = cgltf_parse_file(&options, path_model, &data);
+  if (result != cgltf_result_success) {
+    ERROR("Could not parse file: %s\n", path_model);
+    return -1;
+  }
+  result = cgltf_load_buffers(&options, data, path_model);
+  if (result != cgltf_result_success) {
+    ERROR("Could not load buffers from %s\n", path_model);
+    return -1;
+  }
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
+  GLuint vao_gltf_cube = 0;
+  glGenVertexArrays(1, &vao_gltf_cube);
+  glBindVertexArray(vao_gltf_cube);
+
+  GLuint ebo_gltf_cube = 0;
+  glGenBuffers(1, &ebo_gltf_cube);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_gltf_cube);
+
+  cgltf_mesh * mesh = &data->meshes[0];
+  cgltf_primitive * primitive = &mesh->primitives[0];
+  cgltf_accessor * indices = primitive->indices;
+  char * ptr_data = NULL;
+  ptr_data = ((char *)indices->buffer_view->buffer->data)+indices->buffer_view->offset;
+  glBufferData(
+    GL_ELEMENT_ARRAY_BUFFER,
+    indices->buffer_view->size,
+    ptr_data,
+    GL_STATIC_DRAW
+  );
+
+  GLuint vbo_gltf_cube = 0;
+  glGenBuffers(1, &vbo_gltf_cube);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
+
+  cgltf_attribute * attribute1 = &primitive->attributes[0];
+  cgltf_attribute * attribute2 = &primitive->attributes[1];
+
+  ptr_data = (char *)attribute1->data->buffer_view->buffer->data;
+  float * ptr_dataf = (float*)ptr_data;
+  UNUSED(ptr_dataf);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    attribute1->data->buffer_view->size,
+    ptr_data,
+    GL_STATIC_DRAW
+  );
+
+  glVertexAttribPointer(0, // Position.
+    3,
+    GL_FLOAT,
+    GL_FALSE,
+    attribute2->data->stride,
+    (void *)attribute2->data->offset
+  );
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(
-    1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)(3*sizeof(GLfloat))
-  );
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(
-    2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)(6*sizeof(GLfloat))
-  );
-  glEnableVertexAttribArray(2);
+
+  glBindVertexArray(0);
 
   GLuint VAO_light = 0;
   glGenVertexArrays(1, &VAO_light);
   glBindVertexArray(VAO_light);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
   glEnableVertexAttribArray(0);
 
@@ -376,6 +376,7 @@ main(void)
 
     glUseProgram(program_obj);
 
+
     shader_set_v3(program_obj, "position_view", camera_position);
 
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
@@ -388,7 +389,7 @@ main(void)
     vec3_scale(color_light, color_light, 0.8f);
     shader_set_v3(program_obj, "light.diffuse", color_light);
 
-    glBindVertexArray(VAO_obj);
+    glBindVertexArray(vao_gltf_cube);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_diffuse);
@@ -406,7 +407,7 @@ main(void)
       float angle = 20.0f * i;
       mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
       glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
     }
 
     glUseProgram(program_lamp);
@@ -424,7 +425,7 @@ main(void)
           GL_FALSE,
           &model[0][0]
       );
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
     }
 
     glUseProgram(0);

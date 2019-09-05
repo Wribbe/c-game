@@ -107,5 +107,6 @@ void main()
         direction_view);
   }
 
-  FragColor = vec4(result, 1.0f);
+  //FragColor = vec4(result, 1.0f);
+  FragColor = vec4(1.0f);
 }
