@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "linmath.h"
 #include "stb_image.h"
@@ -52,5 +54,8 @@ m4_translate(m4 result, m4 matrix, v3 vec);
 
 GLuint
 texture_load(const char * path_file);
+
+void *
+ptr_gltf_data(cgltf_accessor * accessor);
 
 #endif

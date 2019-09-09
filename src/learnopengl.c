@@ -221,7 +221,7 @@ main(void)
   cgltf_data * data = NULL;
   cgltf_result result = {0};
 
-  const char * path_model = RES("Box");
+  const char * path_model = RES("BoxTextured");
   result = cgltf_parse_file(&options, path_model, &data);
   if (result != cgltf_result_success) {
     ERROR("Could not parse file: %s\n", path_model);
@@ -241,44 +241,90 @@ main(void)
   glGenBuffers(1, &ebo_gltf_cube);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_gltf_cube);
 
-  cgltf_mesh * mesh = &data->meshes[0];
-  cgltf_primitive * primitive = &mesh->primitives[0];
-  cgltf_accessor * indices = primitive->indices;
-  char * ptr_data = NULL;
-  ptr_data = ((char *)indices->buffer_view->buffer->data)+indices->buffer_view->offset;
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER,
-    indices->buffer_view->size,
-    ptr_data,
-    GL_STATIC_DRAW
-  );
+  cgltf_primitive * primitive = &data->meshes->primitives[0];
+
+  struct attrib{
+    float * data;
+    cgltf_size num_elements;
+    size_t stride;
+    cgltf_size offset;
+  };
+
+  size_t size_total = 0;
+  for (int i=0; i<primitive->attributes_count; i++) {
+    size_total += primitive->attributes[i].data->buffer_view->stride;
+  }
+  cgltf_size stride = size_total;
+  size_total *= primitive->indices->count;
+
+  float * buffer_interleaved = malloc(size_total * sizeof(float));
+  memset(buffer_interleaved, 0, size_total*sizeof(float));
+  struct attrib attribs[primitive->attributes_count];
+  size_t offset = 0;
+  for (int i=0; i<primitive->attributes_count; i++) {
+    attribs[i].data = (float *)ptr_gltf_data(primitive->attributes[i].data);
+    switch (primitive->attributes[i].data->type) {
+      case cgltf_type_vec3:
+        attribs[i].num_elements = 3;
+        break;
+      case cgltf_type_vec2:
+        attribs[i].num_elements = 2;
+        break;
+      default:
+        attribs[i].num_elements = 0;
+        break;
+    }
+    attribs[i].offset = offset;
+    offset += attribs[i].num_elements * 4;
+  }
+  unsigned short * ptr_indices = (unsigned short*)ptr_gltf_data(primitive->indices);
+  float * ptr_buffer = buffer_interleaved;
+  for (size_t i=0; i<primitive->indices->count; i++) {
+    for (int j=0; j<primitive->attributes_count; j++) {
+      size_t num_elements = attribs[j].num_elements;
+      for (cgltf_size k=0; k<num_elements; k++) {
+        *ptr_buffer++ = attribs[j].data[ptr_indices[i]*num_elements+k];
+      }
+    }
+  }
 
   GLuint vbo_gltf_cube = 0;
   glGenBuffers(1, &vbo_gltf_cube);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
 
-  cgltf_attribute * attribute1 = &primitive->attributes[0];
-  cgltf_attribute * attribute2 = &primitive->attributes[1];
-
-  ptr_data = (char *)attribute1->data->buffer_view->buffer->data;
-  float * ptr_dataf = (float*)ptr_data;
-  UNUSED(ptr_dataf);
   glBufferData(
     GL_ARRAY_BUFFER,
-    attribute1->data->buffer_view->size,
-    ptr_data,
+    size_total,
+    buffer_interleaved,
     GL_STATIC_DRAW
   );
 
   glVertexAttribPointer(0, // Position.
-    3,
+    attribs[1].num_elements,
     GL_FLOAT,
     GL_FALSE,
-    attribute2->data->stride,
-    (void *)attribute2->data->offset
+    stride,
+    (void *)attribs[1].offset
   );
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, // Normal.
+    attribs[0].num_elements,
+    GL_FLOAT,
+    GL_FALSE,
+    stride,
+    (void *)attribs[0].offset
+  );
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, // UV-coords.
+    attribs[2].num_elements,
+    GL_FLOAT,
+    GL_FALSE,
+    stride,
+    (void *)attribs[2].offset
+  );
+  glEnableVertexAttribArray(2);
 
   glBindVertexArray(0);
 
@@ -376,7 +422,6 @@ main(void)
 
     glUseProgram(program_obj);
 
-
     shader_set_v3(program_obj, "position_view", camera_position);
 
     glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
@@ -407,7 +452,7 @@ main(void)
       float angle = 20.0f * i;
       mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
       glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
-      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     glUseProgram(program_lamp);
@@ -425,7 +470,7 @@ main(void)
           GL_FALSE,
           &model[0][0]
       );
-      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     glUseProgram(0);

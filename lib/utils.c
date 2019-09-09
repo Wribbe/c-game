@@ -190,3 +190,13 @@ uniformf(const char * fmt, ...)
   va_end(args);
   return BUFFER_CHAR;
 }
+
+
+void *
+ptr_gltf_data(cgltf_accessor * accessor)
+{
+  uint8_t * ptr_data = (uint8_t *)accessor->buffer_view->buffer->data;
+  ptr_data += accessor->offset;
+  ptr_data += accessor->buffer_view->offset;
+  return (void *)ptr_data;
+}
