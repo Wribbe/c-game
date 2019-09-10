@@ -1,7 +1,7 @@
-#include "utils.h"
-
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#define CGLTF_IMPLEMENTATION
+
+#include "utils.h"
 
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
 
@@ -189,4 +189,53 @@ uniformf(const char * fmt, ...)
   vsnprintf(BUFFER_CHAR, SIZE_BUFFER_CHAR, fmt, args);
   va_end(args);
   return BUFFER_CHAR;
+}
+
+
+void *
+ptr_gltf_data(cgltf_accessor * accessor)
+{
+  uint8_t * ptr_data = (uint8_t *)accessor->buffer_view->buffer->data;
+  ptr_data += accessor->offset;
+  ptr_data += accessor->buffer_view->offset;
+  return (void *)ptr_data;
+}
+
+
+GLuint
+index_attribute_get(cgltf_attribute * attribute)
+{
+  switch(attribute->type){
+    case cgltf_attribute_type_normal:
+      return 1;
+      break;
+    case cgltf_attribute_type_texcoord:
+      return 2;
+      break;
+    case cgltf_attribute_type_position:
+      return 0;
+      break;
+    default:
+      return 10;
+      break;
+  }
+}
+
+cgltf_size
+num_elements_get(cgltf_attribute * attribute)
+{
+  switch(attribute->data->type) {
+    case cgltf_type_vec3:
+      return 3;
+      break;
+    case cgltf_type_vec2:
+      return 2;
+      break;
+    case cgltf_type_scalar:
+      return 1;
+      break;
+    default:
+      return 0;
+      break;
+  }
 }

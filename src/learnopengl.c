@@ -152,51 +152,6 @@ callback_mouse(GLFWwindow * window, double pos_x, double pos_y)
   camera_reorient(offset_x, offset_y);
 }
 
-GLfloat vertices[] = {
-  // positions          // normals           // texture coords
-  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-   0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-};
-
 v3 positions_cube[] = {
   { 0.0f,  0.0f,  0.0f},
   { 2.0f,  5.0f, -15.0f},
@@ -262,30 +217,85 @@ main(void)
     "src/shaders/light.frag"
   );
 
-  GLuint VAO_obj = 0;
-  glGenVertexArrays(1, &VAO_obj);
-  glBindVertexArray(VAO_obj);
+  cgltf_options options = {0};
+  cgltf_data * data = NULL;
+  cgltf_result result = {0};
 
-  GLuint VBO = 0;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  const char * path_model = RES("BoxTextured");
+  result = cgltf_parse_file(&options, path_model, &data);
+  if (result != cgltf_result_success) {
+    ERROR("Could not parse file: %s\n", path_model);
+    return -1;
+  }
+  result = cgltf_load_buffers(&options, data, path_model);
+  if (result != cgltf_result_success) {
+    ERROR("Could not load buffers from %s\n", path_model);
+    return -1;
+  }
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(
-    1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)(3*sizeof(GLfloat))
+  GLuint vao_gltf_cube = 0;
+  glGenVertexArrays(1, &vao_gltf_cube);
+  glBindVertexArray(vao_gltf_cube);
+
+  cgltf_primitive * primitive = &data->meshes->primitives[0];
+
+  size_t size_total = 0;
+  for (int i=0; i<primitive->attributes_count; i++) {
+    size_total += primitive->attributes[i].data->buffer_view->stride;
+  }
+  cgltf_size stride = size_total;
+  size_total *= primitive->indices->count;
+
+  float * buffer_interleaved = malloc(size_total * sizeof(float));
+  memset(buffer_interleaved, 0, size_total*sizeof(float));
+
+  GLuint vbo_gltf_cube = 0;
+  glGenBuffers(1, &vbo_gltf_cube);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
+
+  float * attribs_data[primitive->attributes_count];
+  size_t offset = 0;
+  for (int i=0; i<primitive->attributes_count; i++) {
+    cgltf_attribute * attribute = &primitive->attributes[i];
+    attribs_data[i] = (float *)ptr_gltf_data(attribute->data);
+    GLuint index_attribute = index_attribute_get(attribute);
+    glVertexAttribPointer(index_attribute,
+      num_elements_get(attribute),
+      GL_FLOAT,
+      GL_FALSE,
+      stride,
+      (void *)offset
+    );
+    glEnableVertexAttribArray(index_attribute);
+    offset += primitive->attributes[i].data->stride;
+  }
+
+  unsigned short * ptr_indices = (unsigned short*)ptr_gltf_data(primitive->indices);
+  float * ptr_buffer = buffer_interleaved;
+  for (size_t i=0; i<primitive->indices->count; i++) {
+    for (int j=0; j<primitive->attributes_count; j++) {
+      cgltf_attribute * attribute = &primitive->attributes[j];
+      cgltf_size num_elements = num_elements_get(attribute);
+      for (cgltf_size k=0; k<num_elements; k++) {
+        *ptr_buffer++ = attribs_data[j][ptr_indices[i]*num_elements+k];
+      }
+    }
+  }
+
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    size_total,
+    buffer_interleaved,
+    GL_STATIC_DRAW
   );
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(
-    2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), (void*)(6*sizeof(GLfloat))
-  );
-  glEnableVertexAttribArray(2);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glBindVertexArray(0);
 
   GLuint VAO_light = 0;
   glGenVertexArrays(1, &VAO_light);
   glBindVertexArray(VAO_light);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
   glEnableVertexAttribArray(0);
 
@@ -388,7 +398,7 @@ main(void)
     vec3_scale(color_light, color_light, 0.8f);
     shader_set_v3(program_obj, "light.diffuse", color_light);
 
-    glBindVertexArray(VAO_obj);
+    glBindVertexArray(vao_gltf_cube);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_diffuse);

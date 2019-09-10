@@ -106,6 +106,5 @@ void main()
     result += calculate_light_point(lights_point[i], normal, position_frag,
         direction_view);
   }
-
   FragColor = vec4(result, 1.0f);
 }
