@@ -58,4 +58,10 @@ texture_load(const char * path_file);
 void *
 ptr_gltf_data(cgltf_accessor * accessor);
 
+GLuint
+index_attribute_get(cgltf_attribute * attribute);
+
+cgltf_size
+num_elements_get(cgltf_attribute * attribute);
+
 #endif

@@ -237,18 +237,7 @@ main(void)
   glGenVertexArrays(1, &vao_gltf_cube);
   glBindVertexArray(vao_gltf_cube);
 
-  GLuint ebo_gltf_cube = 0;
-  glGenBuffers(1, &ebo_gltf_cube);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_gltf_cube);
-
   cgltf_primitive * primitive = &data->meshes->primitives[0];
-
-  struct attrib{
-    float * data;
-    cgltf_size num_elements;
-    size_t stride;
-    cgltf_size offset;
-  };
 
   size_t size_total = 0;
   for (int i=0; i<primitive->attributes_count; i++) {
@@ -259,38 +248,39 @@ main(void)
 
   float * buffer_interleaved = malloc(size_total * sizeof(float));
   memset(buffer_interleaved, 0, size_total*sizeof(float));
-  struct attrib attribs[primitive->attributes_count];
-  size_t offset = 0;
-  for (int i=0; i<primitive->attributes_count; i++) {
-    attribs[i].data = (float *)ptr_gltf_data(primitive->attributes[i].data);
-    switch (primitive->attributes[i].data->type) {
-      case cgltf_type_vec3:
-        attribs[i].num_elements = 3;
-        break;
-      case cgltf_type_vec2:
-        attribs[i].num_elements = 2;
-        break;
-      default:
-        attribs[i].num_elements = 0;
-        break;
-    }
-    attribs[i].offset = offset;
-    offset += attribs[i].num_elements * 4;
-  }
-  unsigned short * ptr_indices = (unsigned short*)ptr_gltf_data(primitive->indices);
-  float * ptr_buffer = buffer_interleaved;
-  for (size_t i=0; i<primitive->indices->count; i++) {
-    for (int j=0; j<primitive->attributes_count; j++) {
-      size_t num_elements = attribs[j].num_elements;
-      for (cgltf_size k=0; k<num_elements; k++) {
-        *ptr_buffer++ = attribs[j].data[ptr_indices[i]*num_elements+k];
-      }
-    }
-  }
 
   GLuint vbo_gltf_cube = 0;
   glGenBuffers(1, &vbo_gltf_cube);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
+
+  float * attribs_data[primitive->attributes_count];
+  size_t offset = 0;
+  for (int i=0; i<primitive->attributes_count; i++) {
+    cgltf_attribute * attribute = &primitive->attributes[i];
+    attribs_data[i] = (float *)ptr_gltf_data(attribute->data);
+    GLuint index_attribute = index_attribute_get(attribute);
+    glVertexAttribPointer(index_attribute,
+      num_elements_get(attribute),
+      GL_FLOAT,
+      GL_FALSE,
+      stride,
+      (void *)offset
+    );
+    glEnableVertexAttribArray(index_attribute);
+    offset += primitive->attributes[i].data->stride;
+  }
+
+  unsigned short * ptr_indices = (unsigned short*)ptr_gltf_data(primitive->indices);
+  float * ptr_buffer = buffer_interleaved;
+  for (size_t i=0; i<primitive->indices->count; i++) {
+    for (int j=0; j<primitive->attributes_count; j++) {
+      cgltf_attribute * attribute = &primitive->attributes[j];
+      cgltf_size num_elements = num_elements_get(attribute);
+      for (cgltf_size k=0; k<num_elements; k++) {
+        *ptr_buffer++ = attribs_data[j][ptr_indices[i]*num_elements+k];
+      }
+    }
+  }
 
   glBufferData(
     GL_ARRAY_BUFFER,
@@ -298,33 +288,7 @@ main(void)
     buffer_interleaved,
     GL_STATIC_DRAW
   );
-
-  glVertexAttribPointer(0, // Position.
-    attribs[1].num_elements,
-    GL_FLOAT,
-    GL_FALSE,
-    stride,
-    (void *)attribs[1].offset
-  );
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribPointer(1, // Normal.
-    attribs[0].num_elements,
-    GL_FLOAT,
-    GL_FALSE,
-    stride,
-    (void *)attribs[0].offset
-  );
-  glEnableVertexAttribArray(1);
-
-  glVertexAttribPointer(2, // UV-coords.
-    attribs[2].num_elements,
-    GL_FLOAT,
-    GL_FALSE,
-    stride,
-    (void *)attribs[2].offset
-  );
-  glEnableVertexAttribArray(2);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glBindVertexArray(0);
 
