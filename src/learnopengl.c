@@ -363,6 +363,18 @@ main(void)
 
   glfwSetScrollCallback(window, callback_scroll);
 
+  FT_Library ft = {0};
+  if (FT_Init_FreeType(&ft)) {
+    fprintf(stderr, "[ERROR:] Failed to initialize FreeType.\n");
+    return -1;
+  }
+
+  FT_Face face = {0};
+  if (FT_New_Face(ft, "res/fonts/OpenSans-Regular.ttf", 0, &face)) {
+    fprintf(stderr, "[ERROR:] Failed to load OpenSans-Regular.ttf.\n");
+    return -1;
+  }
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();

@@ -12,7 +12,7 @@ DIR_SAMPLES=res/samples
 
 DEPS_EXTERNAL=\
 	glfw/src/libglfw3.a ${DIR_OBJ}/glad.o $(wildcard ${DIR_LIB}/*.c) \
-	cgltf/cgltf.h freetype2/build/libfreetype.a
+	cgltf/cgltf.h freetype2/objs/.libs/libfreetype.a
 
 SRCS=$(wildcard ${DIR_SRC}/*.c)
 BINS=$(foreach f,${SRCS},$(patsubst ${DIR_SRC}/%.c,${DIR_BIN}/%,$f))
@@ -21,7 +21,7 @@ FLAGS_C= -std=c11 -Werror -Wall --pedantic -g
 FLAGS_LD = -L/usr/local/lib64 -Lglfw/src
 FLAGS_LIBS= -lglfw3 -lrt -lm -ldl -lX11 -lpthread -lxcb -lXau -lXdmcp -lGL -lm
 INCLUDES=  -I/usr/local/include -Iglfw/include -Iglad/include -I${DIR_LIB} \
-					 -Icgltf -Ifreetype2/include
+					 -Icgltf -Ifreetype2/build/include -Ifreetype2/include
 
 all: ${DIR_SAMPLES} ${BINS}
 
@@ -59,4 +59,6 @@ freetype2:
 	cd $^ && git checkout latest && cmake . && make all
 
 %/libfreetype.a : freetype2
-	cd $^ && mkdir build && cd build && cmake .. && make
+	cd $^ && ./autogen.sh && ./configure --without-zlib --without-png --without-bzip2 --without-harfbuzz && make
+
+
