@@ -24,11 +24,32 @@
 typedef GLfloat m4[4][4];
 typedef GLfloat v3[3];
 
+typedef struct {
+  union {
+    int32_t a[2];
+    struct {
+      int32_t x;
+      int32_t y;
+    };
+  };
+} vec2i;
+
 #define SIZE_BUFFER_CHAR 512
 extern char BUFFER_CHAR[];
+extern GLuint NUM_CHARACTERS;
+
+struct character {
+  GLuint id_texture;
+  vec2i size;
+  vec2i bearing;
+  GLuint advance;
+};
+
+extern struct character characters[];
 
 #define PATH_MODELS_SAMPLE "res/samples/2.0"
 #define RES(x) PATH_MODELS_SAMPLE"/"x"/glTF/"x".gltf"
+
 
 char *
 uniformf(const char * fmt, ...);
@@ -65,5 +86,16 @@ index_attribute_get(cgltf_attribute * attribute);
 
 cgltf_size
 num_elements_get(cgltf_attribute * attribute);
+
+extern GLuint vao_text;
+extern GLuint vbo_text;
+
+void
+render_text(
+  GLuint program_shader,
+  const char * text,
+  vec2i position,
+  GLfloat scale,
+  vec3 color);
 
 #endif

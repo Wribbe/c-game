@@ -4,6 +4,7 @@
 #include "utils.h"
 
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
+GLuint NUM_CHARACTERS = 128;
 
 GLchar *
 read_file(const char * path_file)
@@ -238,4 +239,27 @@ num_elements_get(cgltf_attribute * attribute)
       return 0;
       break;
   }
+}
+
+void
+render_text(
+  GLuint program_shader,
+  const char * text,
+  vec2i position,
+  GLfloat scale,
+  vec3 color)
+{
+  glUseProgram(program_shader);
+  shader_set_v3(program_shader, "color_text", color);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindVertexArray(vao_text);
+
+  for(const char * c = text; *c != '\0'; c++) {
+    printf("%c", *c);
+  }
+  printf("\n");
+
+  glBindVertexArray(0);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
