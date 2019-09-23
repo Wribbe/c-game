@@ -468,8 +468,8 @@ main(void)
 
     shader_set_v3(program_obj, "position_view", camera_position);
 
-    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
-    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+    shader_set_m4(program_obj, "view", view);
+    shader_set_m4(program_obj, "projection", projection);
 
     v3 color_light = {1.0f, 1.0f, 1.0f};
     shader_set_v3(program_obj, "light.specular", color_light);
@@ -495,14 +495,14 @@ main(void)
       m4_translate(model, model, positions_cube[i]);
       float angle = 20.0f * i;
       mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
-      glUniformMatrix4fv(location_model, 1, GL_FALSE, &model[0][0]);
+      shader_set_m4(program_obj, "model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     glUseProgram(program_lamp);
 
-    glUniformMatrix4fv(location_view, 1, GL_FALSE, &view[0][0]);
-    glUniformMatrix4fv(location_projection, 1, GL_FALSE, &projection[0][0]);
+    shader_set_m4(program_lamp, "view", view);
+    shader_set_m4(program_lamp, "projection", projection);
 
     for (int i=0; i<NR_POINT_LIGHTS; i++) {
       mat4x4_identity(model);

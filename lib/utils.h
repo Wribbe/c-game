@@ -66,6 +66,9 @@ shader_set_float(GLuint id, const char * name, GLfloat value);
 void
 shader_set_v3(GLuint id, const char * name, v3 value);
 
+void
+shader_set_m4(GLuint id, const char * name, mat4x4 value);
+
 GLuint
 program_create(const char * source_vertex, const char * source_fragment);
 
