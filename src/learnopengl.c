@@ -423,7 +423,7 @@ main(void)
       float angle = 20.0f * i;
       mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
       shader_set_m4(program_obj, "model", model);
-      //glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     glUseProgram(program_lamp);
@@ -441,7 +441,7 @@ main(void)
           GL_FALSE,
           &model[0][0]
       );
-      //glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     const char * text = "Hello World";
