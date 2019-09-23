@@ -4,7 +4,8 @@
 #include "utils.h"
 
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
-GLuint NUM_CHARACTERS = 128;
+#define NUM_CHARACTERS 128
+struct character characters[NUM_CHARACTERS];
 
 GLchar *
 read_file(const char * path_file)
@@ -253,19 +254,125 @@ render_text(
   const char * text,
   vec2i position,
   GLfloat scale,
-  vec3 color)
+  vec3 color,
+  mat4x4 projection)
 {
   glUseProgram(program_shader);
   shader_set_v3(program_shader, "color_text", color);
+  shader_set_int(program_shader, "text", 4);
+  shader_set_m4(program_shader, "projection", projection);
 
-  glActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE4);
   glBindVertexArray(vao_text);
 
   for(const char * c = text; *c != '\0'; c++) {
-    printf("%c", *c);
-  }
-  printf("\n");
+    uint8_t ch_index = *c;
+    if (ch_index >= NUM_CHARACTERS) {
+      fprintf(stderr, "Character index %hu >= %d, aborting.\n",
+        ch_index,
+        NUM_CHARACTERS
+      );
+      goto cleanup;
+    }
+    struct character ch = characters[ch_index];
+    GLfloat pos_x = position.x + ch.bearing.x * scale;
+    GLfloat pos_y = position.y - (ch.size.y - ch.bearing.y) * scale;
 
+    GLfloat w = ch.size.x * scale;
+    GLfloat h = ch.size.y * scale;
+
+    GLfloat vertices[][4] = {
+      { pos_x,     pos_y + h, 0.0, 0.0 },
+      { pos_x,     pos_y,     0.0, 1.0 },
+      { pos_x + w, pos_y,     1.0, 1.0 },
+
+      { pos_x,     pos_y + h, 0.0, 0.0 },
+      { pos_x + w, pos_y,     1.0, 1.0 },
+      { pos_x + w, pos_y + h, 1.0, 0.0 },
+    };
+
+    glBindTexture(GL_TEXTURE_2D, ch.id_texture);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_text);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    position.x += (ch.advance >> 6) * scale;
+  }
+
+cleanup:
   glBindVertexArray(0);
   glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+int
+init_utils(void)
+{
+
+  FT_Library ft = {0};
+  if (FT_Init_FreeType(&ft)) {
+    fprintf(stderr, "[ERROR:] Failed to initialize FreeType.\n");
+    return -1;
+  }
+
+  FT_Face face = {0};
+  if (FT_New_Face(ft, "res/fonts/OpenSans-Regular.ttf", 0, &face)) {
+    fprintf(stderr, "[ERROR:] Failed to load OpenSans-Regular.ttf.\n");
+    return -1;
+  }
+
+  FT_Set_Pixel_Sizes(face, 0, 48);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  for (GLubyte c=0; c<NUM_CHARACTERS; c++) {
+    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+      fprintf(stderr, "[ERROR:] Failed to load glyph %c.\n", c);
+      return -1;
+    }
+    GLuint texture = 0;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(
+      GL_TEXTURE_2D,
+      0,
+      GL_RED,
+      face->glyph->bitmap.width,
+      face->glyph->bitmap.rows,
+      0,
+      GL_RED,
+      GL_UNSIGNED_BYTE,
+      face->glyph->bitmap.buffer
+    );
+    // Set texture options.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Store character for later use.
+    characters[c].id_texture = texture;
+    characters[c].size = (vec2i){{{
+      face->glyph->bitmap.width,
+      face->glyph->bitmap.rows
+    }}};
+    characters[c].bearing = (vec2i){{{
+      face->glyph->bitmap_left,
+      face->glyph->bitmap_top
+    }}};
+    characters[c].advance = face->glyph->advance.x;
+  }
+
+  FT_Done_Face(face);
+  FT_Done_FreeType(ft);
+
+  glGenVertexArrays(1, &vao_text);
+  glGenBuffers(1, &vbo_text);
+  glBindVertexArray(vao_text);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_text);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  return 1;
 }

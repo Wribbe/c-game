@@ -309,12 +309,6 @@ main(void)
 
   glUseProgram(program_obj);
 
-  GLuint location_model = glGetUniformLocation(program_obj, "model");
-  GLuint location_view = glGetUniformLocation(program_obj, "view");
-  GLuint location_projection = glGetUniformLocation(
-    program_obj, "projection"
-  );
-
   vec3 color_diffuse = {1.0f, 0.5f, 0.31f};
   vec3_scale(color_diffuse, color_diffuse, 0.2f);
 
@@ -366,82 +360,15 @@ main(void)
 
   glfwSetScrollCallback(window, callback_scroll);
 
-  FT_Library ft = {0};
-  if (FT_Init_FreeType(&ft)) {
-    fprintf(stderr, "[ERROR:] Failed to initialize FreeType.\n");
+  if (!init_utils()) {
+    fprintf(stderr, "[Error]: Could not initialize utils.\n");
     return -1;
   }
 
-  FT_Face face = {0};
-  if (FT_New_Face(ft, "res/fonts/OpenSans-Regular.ttf", 0, &face)) {
-    fprintf(stderr, "[ERROR:] Failed to load OpenSans-Regular.ttf.\n");
-    return -1;
-  }
-
-  FT_Set_Pixel_Sizes(face, 0, 48);
-
-  struct character characters[NUM_CHARACTERS];
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-  for (GLubyte c=0; c<NUM_CHARACTERS; c++) {
-    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-      fprintf(stderr, "[ERROR:] Failed to load glyph %c.\n", c);
-      return -1;
-    }
-    GLuint texture = 0;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_RED,
-      face->glyph->bitmap.width,
-      face->glyph->bitmap.rows,
-      0,
-      GL_RED,
-      GL_UNSIGNED_BYTE,
-      face->glyph->bitmap.buffer
-    );
-    // Set texture options.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // Store character for later use.
-    characters[c].id_texture = texture;
-    characters[c].size = (vec2i){{{
-      face->glyph->bitmap.width,
-      face->glyph->bitmap.rows
-    }}};
-    characters[c].bearing = (vec2i){{{
-      face->glyph->bitmap_left,
-      face->glyph->bitmap_top
-    }}};
-    characters[c].advance = face->glyph->advance.x;
-  }
-
-  FT_Done_Face(face);
-  FT_Done_FreeType(ft);
-
-  glGenVertexArrays(1, &vao_text);
-  glGenBuffers(1, &vbo_text);
-  glBindVertexArray(vao_text);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_text);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  render_text(
-    0,
-    "HELLO",
-    (vec2i){{{1,1}}},
-    0.0f,
-    (vec3){0.0f, 0.0f, 0.0f}
+  GLuint program_text = program_create(
+    "src/shaders/text.vert",
+    "src/shaders/text.frag"
   );
-
-  UNUSED(characters);
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -516,6 +443,15 @@ main(void)
       );
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+
+    render_text(
+      program_text,
+      "HELLO",
+      (vec2i){{{0,0}}},
+      1.0f,
+      (vec3){1.0f, 1.0f, 1.0f},
+      projection
+    );
 
     glUseProgram(0);
     glfwSwapBuffers(window);

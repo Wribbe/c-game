@@ -99,6 +99,10 @@ render_text(
   const char * text,
   vec2i position,
   GLfloat scale,
-  vec3 color);
+  vec3 color,
+  mat4x4 projection
+);
 
+int
+init_utils(void);
 #endif
