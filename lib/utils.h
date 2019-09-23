@@ -34,6 +34,16 @@ typedef struct {
   };
 } vec2i;
 
+typedef struct {
+  union {
+    float a[2];
+    struct {
+      float x;
+      float y;
+    };
+  };
+} vec2f;
+
 #define SIZE_BUFFER_CHAR 512
 #define NUM_CHARACTERS 128
 extern char BUFFER_CHAR[];
@@ -97,10 +107,11 @@ void
 render_text(
   GLuint program_shader,
   const char * text,
-  vec2i position,
+  vec2f position,
   GLfloat scale,
   vec3 color,
-  mat4x4 projection
+  mat4x4 projection,
+  mat4x4 view
 );
 
 int

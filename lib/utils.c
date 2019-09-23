@@ -4,7 +4,6 @@
 #include "utils.h"
 
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
-#define NUM_CHARACTERS 128
 struct character characters[NUM_CHARACTERS];
 
 GLchar *
@@ -252,14 +251,19 @@ void
 render_text(
   GLuint program_shader,
   const char * text,
-  vec2i position,
+  vec2f position,
   GLfloat scale,
   vec3 color,
-  mat4x4 projection)
+  mat4x4 projection,
+  mat4x4 view)
 {
   glUseProgram(program_shader);
   shader_set_v3(program_shader, "color_text", color);
   shader_set_int(program_shader, "text", 4);
+  mat4x4 model = {0};
+  mat4x4_identity(model);
+  shader_set_m4(program_shader, "model", model);
+  shader_set_m4(program_shader, "view", view);
   shader_set_m4(program_shader, "projection", projection);
 
   glActiveTexture(GL_TEXTURE4);
@@ -281,35 +285,25 @@ render_text(
     GLfloat w = ch.size.x * scale;
     GLfloat h = ch.size.y * scale;
 
-    //GLfloat vertices[][4] = {
-    //  { pos_x,     pos_y + h, 0.0, 0.0 },
-    //  { pos_x,     pos_y,     0.0, 1.0 },
-    //  { pos_x + w, pos_y,     1.0, 1.0 },
-
-    //  { pos_x,     pos_y + h, 0.0, 0.0 },
-    //  { pos_x + w, pos_y,     1.0, 1.0 },
-    //  { pos_x + w, pos_y + h, 1.0, 0.0 },
-    //};
-
     GLfloat vertices[][4] = {
-      { -0.5, -0.5, 0.0, 0.0 },
-      {  0.5, -0.5, 1.0, 0.0 },
-      {  0.5,  0.5, 1.0, 1.0 },
+      { pos_x,     pos_y + h, 0.0, 0.0 },
+      { pos_x,     pos_y,     0.0, 1.0 },
+      { pos_x + w, pos_y,     1.0, 1.0 },
+
+      { pos_x,     pos_y + h, 0.0, 0.0 },
+      { pos_x + w, pos_y,     1.0, 1.0 },
+      { pos_x + w, pos_y + h, 1.0, 0.0 },
     };
-    UNUSED(h);
-    UNUSED(w);
-    UNUSED(pos_x);
-    UNUSED(pos_y);
 
     glBindTexture(GL_TEXTURE_2D, ch.id_texture);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_text);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     position.x += (ch.advance >> 6) * scale;
-    glUseProgram(0);
   }
+  glUseProgram(0);
 
 cleanup:
   glBindVertexArray(0);

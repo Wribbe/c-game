@@ -370,6 +370,9 @@ main(void)
     "src/shaders/text.frag"
   );
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();
@@ -444,57 +447,16 @@ main(void)
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    const char * text = "Hello World";
-    vec2 position = {0.0f, 0.0f};
-    GLfloat scale = 0.01f;
+    render_text(
+      program_text,
+      "HELLO WORLD",
+      (vec2f){{{1.0f, 1.0f}}},
+      0.001f,
+      (vec3){1.0f, 1.0f, 0.0f},
+      projection,
+      view
+    );
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glUseProgram(program_text);
-    shader_set_v3(program_text, "color_text", (vec3){1.0f, 1.0f, 0.0f});
-    shader_set_int(program_text, "text", 4);
-    mat4x4_identity(model);
-    shader_set_m4(program_text, "model", model);
-    shader_set_m4(program_text, "view", view);
-    shader_set_m4(program_text, "projection", projection);
-
-    glActiveTexture(GL_TEXTURE4);
-    glBindVertexArray(vao_text);
-
-    for(const char * c = text; *c != '\0'; c++) {
-      uint8_t ch_index = *c;
-      if (ch_index >= NUM_CHARACTERS) {
-        fprintf(stderr, "Character index %hu >= %d, aborting.\n",
-          ch_index,
-          NUM_CHARACTERS
-        );
-      }
-      struct character ch = characters[ch_index];
-      GLfloat pos_x = position[0] + ch.bearing.x * scale;
-      GLfloat pos_y = position[1] - (ch.size.y - ch.bearing.y) * scale;
-
-      GLfloat w = ch.size.x * scale;
-      GLfloat h = ch.size.y * scale;
-
-      GLfloat vertices[][4] = {
-        { pos_x,     pos_y + h, 0.0, 0.0 },
-        { pos_x,     pos_y,     0.0, 1.0 },
-        { pos_x + w, pos_y,     1.0, 1.0 },
-
-        { pos_x,     pos_y + h, 0.0, 0.0 },
-        { pos_x + w, pos_y,     1.0, 1.0 },
-        { pos_x + w, pos_y + h, 1.0, 0.0 },
-      };
-
-      glBindTexture(GL_TEXTURE_2D, ch.id_texture);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo_text);
-      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-      position[0] += (ch.advance >> 6) * scale;
-    }
     glUseProgram(0);
     glfwSwapBuffers(window);
   }
