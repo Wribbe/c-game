@@ -35,8 +35,8 @@ typedef struct {
 } vec2i;
 
 #define SIZE_BUFFER_CHAR 512
+#define NUM_CHARACTERS 128
 extern char BUFFER_CHAR[];
-extern GLuint NUM_CHARACTERS;
 
 struct character {
   GLuint id_texture;

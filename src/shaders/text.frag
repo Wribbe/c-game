@@ -9,6 +9,5 @@ void
 main()
 {
   vec4 sampled = vec4(1.0f, 1.0f, 1.0f, texture(text, coord_tex).r);
-  // color = vec4(color_text, 1.0) * sampled;
-  color = vec4(1.0f);
+  color = vec4(color_text, 1.0) * sampled;
 }

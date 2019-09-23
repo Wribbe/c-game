@@ -281,23 +281,34 @@ render_text(
     GLfloat w = ch.size.x * scale;
     GLfloat h = ch.size.y * scale;
 
-    GLfloat vertices[][4] = {
-      { pos_x,     pos_y + h, 0.0, 0.0 },
-      { pos_x,     pos_y,     0.0, 1.0 },
-      { pos_x + w, pos_y,     1.0, 1.0 },
+    //GLfloat vertices[][4] = {
+    //  { pos_x,     pos_y + h, 0.0, 0.0 },
+    //  { pos_x,     pos_y,     0.0, 1.0 },
+    //  { pos_x + w, pos_y,     1.0, 1.0 },
 
-      { pos_x,     pos_y + h, 0.0, 0.0 },
-      { pos_x + w, pos_y,     1.0, 1.0 },
-      { pos_x + w, pos_y + h, 1.0, 0.0 },
+    //  { pos_x,     pos_y + h, 0.0, 0.0 },
+    //  { pos_x + w, pos_y,     1.0, 1.0 },
+    //  { pos_x + w, pos_y + h, 1.0, 0.0 },
+    //};
+
+    GLfloat vertices[][4] = {
+      { -0.5, -0.5, 0.0, 0.0 },
+      {  0.5, -0.5, 1.0, 0.0 },
+      {  0.5,  0.5, 1.0, 1.0 },
     };
+    UNUSED(h);
+    UNUSED(w);
+    UNUSED(pos_x);
+    UNUSED(pos_y);
 
     glBindTexture(GL_TEXTURE_2D, ch.id_texture);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_text);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     position.x += (ch.advance >> 6) * scale;
+    glUseProgram(0);
   }
 
 cleanup:
