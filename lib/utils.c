@@ -248,6 +248,29 @@ num_elements_get(cgltf_attribute * attribute)
 }
 
 void
+render_ui(
+  GLuint program_shader,
+  const char * text,
+  vec2f position,
+  GLfloat scale,
+  vec3 color)
+{
+  mat4x4 projection = {0};
+  mat4x4 view = {0};
+  mat4x4_identity(projection);
+  mat4x4_identity(view);
+  render_text(
+    program_shader,
+    text,
+    position,
+    scale,
+    color,
+    projection,
+    view
+  );
+}
+
+void
 render_text(
   GLuint program_shader,
   const char * text,
@@ -259,14 +282,14 @@ render_text(
 {
   glUseProgram(program_shader);
   shader_set_v3(program_shader, "color_text", color);
-  shader_set_int(program_shader, "text", 4);
+  shader_set_int(program_shader, "text", 0);
   mat4x4 model = {0};
   mat4x4_identity(model);
   shader_set_m4(program_shader, "model", model);
   shader_set_m4(program_shader, "view", view);
   shader_set_m4(program_shader, "projection", projection);
 
-  glActiveTexture(GL_TEXTURE4);
+  glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(vao_text);
 
   for(const char * c = text; *c != '\0'; c++) {

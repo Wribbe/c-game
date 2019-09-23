@@ -114,6 +114,15 @@ render_text(
   mat4x4 view
 );
 
+void
+render_ui(
+  GLuint program_shader,
+  const char * text,
+  vec2f position,
+  GLfloat scale,
+  vec3 color
+);
+
 int
 init_utils(void);
 #endif
