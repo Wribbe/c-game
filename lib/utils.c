@@ -258,6 +258,7 @@ render_ui(
   mat4x4 projection = {0};
   mat4x4 view = {0};
   mat4x4_identity(projection);
+  projection[3][2] = -1.0f;
   mat4x4_identity(view);
   render_text(
     program_shader,

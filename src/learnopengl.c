@@ -462,7 +462,7 @@ main(void)
       "HELLO UI",
       (vec2f){{{0.0f, 0.0f}}},
       0.001f,
-      (vec3){1.0f, 1.0f, 0.0f}
+      (vec3){1.0f, 0.0f, 0.0f}
     );
 
     glUseProgram(0);
