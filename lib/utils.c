@@ -1,6 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define CGLTF_IMPLEMENTATION
 
+#include "jsmn.h"
 #include "utils.h"
 
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
