@@ -373,6 +373,28 @@ main(void)
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+/*
+  jsmn_parser parser;
+  const char * s = \
+    "{\
+      name: Jack, \
+      age : 27\
+      nested : { \
+        nested_name: Teeeeeest, \
+        array: [1, 2, 3, 4], \
+      } \
+    }";
+  jsmn_init(&parser);
+  int num_tokens = jsmn_parse(&parser, s, strlen(s), NULL, 1);
+  jsmn_init(&parser);
+  jsmntok_t t[num_tokens];
+  jsmn_parse(&parser, s, strlen(s), t, num_tokens);
+  for (int i=1; i<num_tokens; i++) {
+    printf("size of child %d: %d.\n", i, t[i].size);
+    printf("first char: %c\n", s[t[i].start]);
+  }
+*/
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();
