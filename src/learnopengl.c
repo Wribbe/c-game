@@ -399,6 +399,9 @@ main(void)
 
   timespec_get(&time_prev, TIME_UTC);
 
+  size_t size_buffer_char = 512;
+  char buffer_char[size_buffer_char];
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();
@@ -473,20 +476,19 @@ main(void)
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    render_text(
-      program_text,
-      "HELLO WORLD",
-      (vec2f){{{1.0f, 1.0f}}},
-      0.001f,
-      (vec3){1.0f, 1.0f, 0.0f},
-      projection,
-      view
-    );
+    timespec_get(&time_current, TIME_UTC);
+    float ms_frame = \
+      ((time_current.tv_sec - time_prev.tv_sec)*1e3) +
+      ((time_current.tv_nsec - time_prev.tv_nsec)/1e6);
 
+    time_prev.tv_sec = time_current.tv_sec;
+    time_prev.tv_nsec = time_current.tv_nsec;
+
+    snprintf(buffer_char, size_buffer_char, "ms-frame: %.2fms", ms_frame);
     render_ui(
       program_text,
-      "HELLO UI",
-      (vec2f){{{0.0f, 0.0f}}},
+      buffer_char,
+      (vec2f){{{0.55f, 0.95f}}},
       0.001f,
       (vec3){1.0f, 0.0f, 0.0f}
     );
@@ -494,13 +496,6 @@ main(void)
     glUseProgram(0);
     glfwSwapBuffers(window);
 
-    timespec_get(&time_current, TIME_UTC);
-    printf("Elapsed time: %fms.\n",
-      ((time_current.tv_sec - time_prev.tv_sec)*1e3) +
-      ((time_current.tv_nsec - time_prev.tv_nsec)/1e6)
-    );
-    time_prev.tv_sec = time_current.tv_sec;
-    time_prev.tv_nsec = time_current.tv_nsec;
   }
 
   glfwDestroyWindow(window);
