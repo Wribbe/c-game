@@ -21,8 +21,6 @@ GLfloat fov = 45.0f;
 
 vec3 position_light = {1.0f, 3.0f, 0.4f};
 
-float speed_camera_arrows = 0.8f;
-
 #define NR_POINT_LIGHTS 4
 
 void
@@ -50,6 +48,8 @@ processingInput(GLFWwindow * window)
   }
 
   float camera_speed = 2.5f * time_delta;
+  float speed_camera_arrows = 60.0f * time_delta;
+
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     vec3 temp = {0};
