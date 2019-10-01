@@ -402,6 +402,8 @@ main(void)
   size_t size_buffer_char = 512;
   char buffer_char[size_buffer_char];
 
+  glfwSwapInterval(-1);
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();
