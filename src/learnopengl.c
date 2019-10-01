@@ -394,6 +394,10 @@ main(void)
     printf("first char: %c\n", s[t[i].start]);
   }
 */
+  struct timespec time_current = {0};
+  struct timespec time_prev = {0};
+
+  timespec_get(&time_prev, TIME_UTC);
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -489,6 +493,14 @@ main(void)
 
     glUseProgram(0);
     glfwSwapBuffers(window);
+
+    timespec_get(&time_current, TIME_UTC);
+    printf("Elapsed time: %fms.\n",
+      ((time_current.tv_sec - time_prev.tv_sec)*1e3) +
+      ((time_current.tv_nsec - time_prev.tv_nsec)/1e6)
+    );
+    time_prev.tv_sec = time_current.tv_sec;
+    time_prev.tv_nsec = time_current.tv_nsec;
   }
 
   glfwDestroyWindow(window);

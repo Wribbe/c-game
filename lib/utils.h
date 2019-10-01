@@ -4,11 +4,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "linmath.h"
 #include "stb_image.h"
