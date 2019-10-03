@@ -183,8 +183,8 @@ main(void)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLuint SCREEN_WIDTH = 800;
-  GLuint SCREEN_HEIGHT = 600;
+  GLuint SCREEN_WIDTH = 1920;
+  GLuint SCREEN_HEIGHT = 1080;
 
   GLFWwindow * window = glfwCreateWindow(
     SCREEN_WIDTH,
