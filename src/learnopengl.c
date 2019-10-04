@@ -400,6 +400,8 @@ main(void)
   char buffer_char[size_buffer_char];
 
   glfwSwapInterval(-1);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
 
   while (!glfwWindowShouldClose(window)) {
 
