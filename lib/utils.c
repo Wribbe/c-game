@@ -7,6 +7,9 @@
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
 struct character characters[NUM_CHARACTERS];
 
+GLuint SCREEN_WIDTH = 1920;
+GLuint SCREEN_HEIGHT = 1080;
+
 GLchar *
 read_file(const char * path_file)
 {
@@ -259,7 +262,13 @@ render_ui(
   mat4x4 projection = {0};
   mat4x4 view = {0};
   mat4x4_identity(projection);
+  projection[3][1] = position.y;
+  projection[3][0] = position.x;
   projection[3][2] = -1.0f;
+  position.x = 0.0f;
+  position.y = 0.0f;
+  //projection[3][1] = -0.5f;
+  projection[0][0] = (float)SCREEN_HEIGHT/(float)SCREEN_WIDTH;
   mat4x4_identity(view);
   render_text(
     program_shader,

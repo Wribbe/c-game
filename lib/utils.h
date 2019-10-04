@@ -60,6 +60,9 @@ struct character {
 };
 
 extern struct character characters[];
+extern GLuint SCREEN_WIDTH;
+extern GLuint SCREEN_HEIGHT;
+
 
 #define PATH_MODELS_SAMPLE "res/samples/2.0"
 #define RES(x) PATH_MODELS_SAMPLE"/"x"/glTF/"x".gltf"

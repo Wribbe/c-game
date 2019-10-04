@@ -183,9 +183,6 @@ main(void)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLuint SCREEN_WIDTH = 1920;
-  GLuint SCREEN_HEIGHT = 1080;
-
   GLFWwindow * window = glfwCreateWindow(
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -490,7 +487,7 @@ main(void)
     render_ui(
       program_text,
       buffer_char,
-      (vec2f){{{0.55f, 0.95f}}},
+      (vec2f){{{0.75f, 0.95f}}},
       0.001f,
       (vec3){1.0f, 0.0f, 0.0f}
     );
