@@ -135,10 +135,6 @@ callback_keys(GLFWwindow * window,
   UNUSED(mods);
   UNUSED(scancode);
 
-  if (key == GLFW_REPEAT) {
-    return;
-  }
-
   switch(action) {
     case GLFW_PRESS:
       statuses_buttons[key].pressed = GL_TRUE;
