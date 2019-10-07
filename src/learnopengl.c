@@ -47,6 +47,7 @@ callback_frabuffer_size(
 
 enum flag {
   SPACE_TOGGLE,
+  SHIFT_DOWN,
   NUM_FLAGS,
 };
 
@@ -142,9 +143,16 @@ processingInput(GLFWwindow * window)
   if (statuses_buttons[GLFW_KEY_SPACE].changed) {
     if (statuses_buttons[GLFW_KEY_SPACE].pressed) {
       flags_toggle(SPACE_TOGGLE);
-      printf("SPACE_TOGGLE: %d\n", flags_get(SPACE_TOGGLE));
     }
     statuses_buttons[GLFW_KEY_SPACE].changed = GL_FALSE;
+  }
+  if (statuses_buttons[GLFW_KEY_LEFT_SHIFT].changed) {
+    if (statuses_buttons[GLFW_KEY_LEFT_SHIFT].pressed) {
+      flags_set(SHIFT_DOWN);
+    } else {
+      flags_clear(SHIFT_DOWN);
+    }
+    statuses_buttons[GLFW_KEY_LEFT_SHIFT].changed = GL_FALSE;
   }
 }
 
@@ -577,6 +585,32 @@ main(void)
       program_text,
       buffer_char,
       (vec2f){{{0.75f, 0.95f}}},
+      0.001f,
+      (vec3){1.0f, 0.0f, 0.0f}
+    );
+
+    snprintf(buffer_char,
+      size_buffer_char,
+      "Space toggle: %s",
+      flags_get(SPACE_TOGGLE) ? "ON" : "OFF"
+    );
+    render_ui(
+      program_text,
+      buffer_char,
+      (vec2f){{{0.75f, 0.90f}}},
+      0.001f,
+      (vec3){1.0f, 0.0f, 0.0f}
+    );
+
+    snprintf(buffer_char,
+      size_buffer_char,
+      "Shift down: %s",
+      flags_get(SHIFT_DOWN) ? "ON" : "OFF"
+    );
+    render_ui(
+      program_text,
+      buffer_char,
+      (vec2f){{{0.75f, 0.85f}}},
       0.001f,
       (vec3){1.0f, 0.0f, 0.0f}
     );
