@@ -23,6 +23,15 @@ vec3 position_light = {1.0f, 3.0f, 0.4f};
 
 #define NR_POINT_LIGHTS 4
 
+struct status_button {
+  GLboolean pressed;
+  GLboolean held;
+  GLboolean released;
+  GLboolean changed;
+};
+
+struct status_button statuses_buttons[128] = {0};
+
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
 
@@ -87,7 +96,16 @@ processingInput(GLFWwindow * window)
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
     camera_reorient(0.0f, -speed_camera_arrows);
   }
+  if (statuses_buttons[GLFW_KEY_SPACE].changed) {
+    if (statuses_buttons[GLFW_KEY_SPACE].pressed) {
+      printf("Space was pressed.\n");
+    } else {
+      printf("Space was released.\n");
+    }
+    statuses_buttons[GLFW_KEY_SPACE].changed = GL_FALSE;
+  }
 }
+
 
 float
 to_rad(float degrees)
@@ -108,6 +126,37 @@ callback_scroll(GLFWwindow * window, double offset_x, double offset_y)
 }
 
 void
+callback_keys(GLFWwindow * window,
+  int key,
+  int scancode,
+  int action,
+  int mods)
+{
+  UNUSED(mods);
+  UNUSED(scancode);
+
+  if (key == GLFW_REPEAT) {
+    return;
+  }
+
+  switch(action) {
+    case GLFW_PRESS:
+      statuses_buttons[key].pressed = GL_TRUE;
+      statuses_buttons[key].released = GL_FALSE;
+      break;
+    case GLFW_RELEASE:
+      statuses_buttons[key].released = GL_TRUE;
+      statuses_buttons[key].pressed = GL_FALSE;
+      break;
+    default:
+      return;
+      break;
+  }
+  statuses_buttons[key].changed = GL_TRUE;
+}
+
+void
+
 camera_reorient(GLfloat offset_x, GLfloat offset_y)
 {
   yaw += offset_x;
@@ -356,6 +405,7 @@ main(void)
   glfwSetCursorPosCallback(window, callback_mouse);
 
   glfwSetScrollCallback(window, callback_scroll);
+  glfwSetKeyCallback(window, callback_keys);
 
   if (!init_utils()) {
     fprintf(stderr, "[Error]: Could not initialize utils.\n");
