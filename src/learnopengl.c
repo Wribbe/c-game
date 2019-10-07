@@ -27,7 +27,6 @@ vec3 position_light = {1.0f, 3.0f, 0.4f};
 
 struct status_button {
   GLboolean pressed;
-  GLboolean held;
   GLboolean released;
   GLboolean changed;
 };
