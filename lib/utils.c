@@ -9,6 +9,7 @@ struct character characters[NUM_CHARACTERS];
 
 GLuint SCREEN_WIDTH = 1920;
 GLuint SCREEN_HEIGHT = 1080;
+GLfloat SCREEN_ASPECT = 0.0f;
 
 GLchar *
 read_file(const char * path_file)
@@ -267,8 +268,7 @@ render_ui(
   projection[3][2] = -1.0f;
   position.x = 0.0f;
   position.y = 0.0f;
-  //projection[3][1] = -0.5f;
-  projection[0][0] = (float)SCREEN_HEIGHT/(float)SCREEN_WIDTH;
+  projection[0][0] = SCREEN_ASPECT;
   mat4x4_identity(view);
   render_text(
     program_shader,
@@ -412,6 +412,8 @@ init_utils(void)
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
+
+  SCREEN_ASPECT = (float)SCREEN_HEIGHT/(float)SCREEN_WIDTH;
 
   return 1;
 }

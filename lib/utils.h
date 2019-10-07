@@ -62,6 +62,7 @@ struct character {
 extern struct character characters[];
 extern GLuint SCREEN_WIDTH;
 extern GLuint SCREEN_HEIGHT;
+extern GLfloat SCREEN_ASPECT;
 
 
 #define PATH_MODELS_SAMPLE "res/samples/2.0"
