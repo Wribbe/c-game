@@ -19,6 +19,8 @@ GLboolean first_mouse = GL_TRUE;
 
 GLfloat fov = 45.0f;
 
+int64_t flags = {0};
+
 vec3 position_light = {1.0f, 3.0f, 0.4f};
 
 #define NR_POINT_LIGHTS 4
@@ -42,6 +44,48 @@ callback_frabuffer_size(
     int height)
 {
   glViewport(0, 0, width, height);
+}
+
+enum flag {
+  SPACE_TOGGLE,
+  NUM_FLAGS,
+};
+
+void
+flags_set(enum flag flag)
+{
+  if (flag >= NUM_FLAGS) {
+    return;
+  }
+  flags |= (1 << flag);
+}
+
+void
+flags_clear(enum flag flag)
+{
+  if (flag >= NUM_FLAGS) {
+    return;
+  }
+  flags &= ~(1 << flag);
+}
+
+void
+flags_toggle(enum flag flag)
+{
+  if (flag >= NUM_FLAGS) {
+    return;
+  }
+  flags ^= (1 << flag);
+}
+
+GLboolean
+flags_get(enum flag flag)
+{
+  if (flag >= NUM_FLAGS) {
+    return GL_FALSE;
+  }
+  int mask = 1 << flag;
+  return (flags & mask) >> flag;
 }
 
 void
@@ -98,9 +142,8 @@ processingInput(GLFWwindow * window)
   }
   if (statuses_buttons[GLFW_KEY_SPACE].changed) {
     if (statuses_buttons[GLFW_KEY_SPACE].pressed) {
-      printf("Space was pressed.\n");
-    } else {
-      printf("Space was released.\n");
+      flags_toggle(SPACE_TOGGLE);
+      printf("SPACE_TOGGLE: %d\n", flags_get(SPACE_TOGGLE));
     }
     statuses_buttons[GLFW_KEY_SPACE].changed = GL_FALSE;
   }
