@@ -152,7 +152,6 @@ callback_keys(GLFWwindow * window,
 }
 
 void
-
 camera_reorient(GLfloat offset_x, GLfloat offset_y)
 {
   yaw += offset_x;
