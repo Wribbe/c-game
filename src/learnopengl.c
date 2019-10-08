@@ -22,6 +22,7 @@ GLfloat fov = 45.0f;
 int64_t flags = {0};
 
 vec3 position_light = {1.0f, 3.0f, 0.4f};
+GLfloat angle_rotation_view = 0.0f;
 
 #define NR_POINT_LIGHTS 4
 
@@ -129,10 +130,18 @@ processingInput(GLFWwindow * window)
     vec3_add(camera_position, camera_position, temp);
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    camera_reorient(-speed_camera_arrows, 0.0f);
+    if (flags_get(SHIFT_DOWN)) {
+      angle_rotation_view += 1.0f*time_delta;
+    } else {
+      camera_reorient(-speed_camera_arrows, 0.0f);
+    }
   }
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    camera_reorient(speed_camera_arrows, 0.0f);
+    if (flags_get(SHIFT_DOWN)) {
+      angle_rotation_view -= 1.0f*time_delta;
+    } else {
+      camera_reorient(speed_camera_arrows, 0.0f);
+    }
   }
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
     camera_reorient(0.0f, speed_camera_arrows);
@@ -513,6 +522,8 @@ main(void)
       camera_target,
       camera_up
     );
+
+    mat4x4_rotate_Z(view, view, angle_rotation_view);
 
     mat4x4_perspective(
       projection, to_rad(fov), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT,
