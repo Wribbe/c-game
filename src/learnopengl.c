@@ -29,6 +29,7 @@ struct status_button {
   GLboolean pressed;
   GLboolean released;
   GLboolean changed;
+  GLboolean processed;
 };
 
 struct status_button statuses_buttons[128] = {0};
@@ -47,7 +48,8 @@ callback_frabuffer_size(
 
 enum flag {
   SPACE_TOGGLE,
-  SHIFT_DOWN,
+  DOWN_SHIFT,
+  DOWN_C,
   NUM_FLAGS,
 };
 
@@ -89,6 +91,19 @@ flags_get(enum flag flag)
 }
 
 void
+flag_change(GLuint key, enum flag flag) {
+  if (statuses_buttons[key].changed) {
+    if (statuses_buttons[key].pressed) {
+      flags_set(flag);
+    } else {
+      flags_clear(flag);
+    }
+    statuses_buttons[key].changed = GL_FALSE;
+    statuses_buttons[key].processed = GL_FALSE;
+  }
+}
+
+void
 processingInput(GLFWwindow * window)
 {
 
@@ -101,19 +116,19 @@ processingInput(GLFWwindow * window)
   }
 
   float camera_speed = 2.5f * time_delta;
-  float speed_camera_arrows = 60.0f * time_delta;
+//  float speed_camera_arrows = 60.0f * time_delta;
 
 
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    vec3 temp = {0};
-    vec3_scale(temp, camera_front, camera_speed);
-    vec3_add(camera_position, camera_position, temp);
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    vec3 temp = {0};
-    vec3_scale(temp, camera_front, camera_speed);
-    vec3_sub(camera_position, camera_position, temp);
-  }
+//  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+//    vec3 temp = {0};
+//    vec3_scale(temp, camera_front, camera_speed);
+//    vec3_add(camera_position, camera_position, temp);
+//  }
+//  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+//    vec3 temp = {0};
+//    vec3_scale(temp, camera_front, camera_speed);
+//    vec3_sub(camera_position, camera_position, temp);
+//  }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
     vec3 temp = {0};
     vec3_mul_cross(temp, camera_front, camera_up);
@@ -128,18 +143,18 @@ processingInput(GLFWwindow * window)
     vec3_scale(temp, temp, camera_speed);
     vec3_add(camera_position, camera_position, temp);
   }
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    camera_reorient(-speed_camera_arrows, 0.0f);
-  }
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    camera_reorient(speed_camera_arrows, 0.0f);
-  }
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    camera_reorient(0.0f, speed_camera_arrows);
-  }
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    camera_reorient(0.0f, -speed_camera_arrows);
-  }
+//  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+//    camera_reorient(-speed_camera_arrows, 0.0f);
+//  }
+//  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+//    camera_reorient(speed_camera_arrows, 0.0f);
+//  }
+//  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+//    camera_reorient(0.0f, speed_camera_arrows);
+//  }
+//  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+//    camera_reorient(0.0f, -speed_camera_arrows);
+//  }
   if (statuses_buttons[GLFW_KEY_SPACE].changed) {
     if (statuses_buttons[GLFW_KEY_SPACE].pressed) {
       flags_toggle(SPACE_TOGGLE);
@@ -148,12 +163,13 @@ processingInput(GLFWwindow * window)
   }
   if (statuses_buttons[GLFW_KEY_LEFT_SHIFT].changed) {
     if (statuses_buttons[GLFW_KEY_LEFT_SHIFT].pressed) {
-      flags_set(SHIFT_DOWN);
+      flags_set(DOWN_SHIFT);
     } else {
-      flags_clear(SHIFT_DOWN);
+      flags_clear(DOWN_SHIFT);
     }
     statuses_buttons[GLFW_KEY_LEFT_SHIFT].changed = GL_FALSE;
   }
+  flag_change(GLFW_KEY_C, DOWN_C);
 }
 
 
@@ -447,7 +463,7 @@ main(void)
   glEnable(GL_DEPTH_TEST);
 
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetCursorPosCallback(window, callback_mouse);
+//  glfwSetCursorPosCallback(window, callback_mouse);
 
   glfwSetScrollCallback(window, callback_scroll);
   glfwSetKeyCallback(window, callback_keys);
@@ -605,7 +621,7 @@ main(void)
     snprintf(buffer_char,
       size_buffer_char,
       "Shift down: %s",
-      flags_get(SHIFT_DOWN) ? "ON" : "OFF"
+      flags_get(DOWN_SHIFT) ? "ON" : "OFF"
     );
     render_ui(
       program_text,
@@ -614,6 +630,38 @@ main(void)
       0.001f,
       (vec3){1.0f, 0.0f, 0.0f}
     );
+
+    snprintf(buffer_char,
+      size_buffer_char,
+      "C down: %s",
+      flags_get(DOWN_C) ? "ON" : "OFF"
+    );
+    render_ui(
+      program_text,
+      buffer_char,
+      (vec2f){{{0.75f, 0.80f}}},
+      0.001f,
+      (vec3){1.0f, 0.0f, 0.0f}
+    );
+
+    snprintf(buffer_char,
+      size_buffer_char,
+      "C down: %s",
+      flags_get(DOWN_C) ? "ON" : "OFF"
+    );
+
+    render_ui(
+      program_text,
+      buffer_char,
+      (vec2f){{{0.75f, 0.80f}}},
+      0.001f,
+      (vec3){1.0f, 0.0f, 0.0f}
+    );
+
+    if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
+      printf("Create a new crate.\n");
+      statuses_buttons[GLFW_KEY_C].processed = GL_TRUE;
+    }
 
     glUseProgram(0);
     glfwSwapBuffers(window);
