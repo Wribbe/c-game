@@ -12,6 +12,8 @@ float time_current = 0.0f;
 float last_x = 400;
 float last_y = 300;
 
+GLboolean pos_new_values = GL_FALSE;
+
 float yaw = -90.0f;
 float pitch = 0.0f;
 
@@ -34,6 +36,16 @@ struct status_button {
 
 struct status_button statuses_buttons[128] = {0};
 
+struct object {
+  GLuint program;
+  GLuint vao;
+  mat4x4 model;
+};
+
+#define NUM_OBJECTS 256
+struct object objects[NUM_OBJECTS] = {0};
+struct object * object_current = objects;
+
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
 
@@ -50,6 +62,7 @@ enum flag {
   SPACE_TOGGLE,
   DOWN_SHIFT,
   DOWN_C,
+  DOWN_D,
   NUM_FLAGS,
 };
 
@@ -129,19 +142,31 @@ processingInput(GLFWwindow * window)
 //    vec3_scale(temp, camera_front, camera_speed);
 //    vec3_sub(camera_position, camera_position, temp);
 //  }
+//  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+//    vec3 temp = {0};
+//    vec3_mul_cross(temp, camera_front, camera_up);
+//    vec3_norm(temp, temp);
+//    vec3_scale(temp, temp, camera_speed);
+//    vec3_sub(camera_position, camera_position, temp);
+//  }
+//  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+//    vec3 temp = {0};
+//    vec3_mul_cross(temp, camera_front, camera_up);
+//    vec3_norm(temp, temp);
+//    vec3_scale(temp, temp, camera_speed);
+//    vec3_add(camera_position, camera_position, temp);
+//  }
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    camera_position[1] += camera_speed;
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    camera_position[1] -= camera_speed;
+  }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    vec3 temp = {0};
-    vec3_mul_cross(temp, camera_front, camera_up);
-    vec3_norm(temp, temp);
-    vec3_scale(temp, temp, camera_speed);
-    vec3_sub(camera_position, camera_position, temp);
+    camera_position[0] -= camera_speed;
   }
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    vec3 temp = {0};
-    vec3_mul_cross(temp, camera_front, camera_up);
-    vec3_norm(temp, temp);
-    vec3_scale(temp, temp, camera_speed);
-    vec3_add(camera_position, camera_position, temp);
+    camera_position[0] += camera_speed;
   }
 //  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 //    camera_reorient(-speed_camera_arrows, 0.0f);
@@ -170,6 +195,7 @@ processingInput(GLFWwindow * window)
     statuses_buttons[GLFW_KEY_LEFT_SHIFT].changed = GL_FALSE;
   }
   flag_change(GLFW_KEY_C, DOWN_C);
+  flag_change(GLFW_KEY_G, DOWN_D);
 }
 
 
@@ -514,6 +540,21 @@ main(void)
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
+  for (int i=0; i<10; i++) {
+    object_current->vao = vao_gltf_cube;
+    object_current->program = program_obj;
+    mat4x4_identity(object_current->model);
+    m4_translate(
+      object_current->model,
+      object_current->model,
+      positions_cube[i]
+    );
+    object_current++;
+  }
+
+  srand(time(NULL));
+  rand(); // Skip first value.
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();
@@ -561,16 +602,59 @@ main(void)
     shader_set_v3(program_obj, "light.position", camera_position);
     shader_set_v3(program_obj, "light.direction", camera_front);
 
-    for (int i=0; i<10; i++) {
-      mat4x4_identity(model);
-      m4_translate(model, model, positions_cube[i]);
-      float angle = 20.0f * i;
-      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
-      shader_set_m4(program_obj, "model", model);
+    //for (int i=0; i<10; i++) {
+    //  mat4x4_identity(model);
+    //  m4_translate(model, model, positions_cube[i]);
+    //  float angle = 20.0f * i;
+    //  mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
+    //  shader_set_m4(program_obj, "model", model);
+    //  glDrawArrays(GL_TRIANGLES, 0, 36);
+    //}
+
+    for (struct object * object = objects; object != object_current; object++) {
+//      mat4x4_identity(model);
+//      m4_translate(model, model, positions_cube[i]);
+//      float angle = 20.0f * i++;
+//      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
+      glUseProgram(object->program);
+      glBindVertexArray(object->vao);
+      shader_set_m4(object->program, "model", object->model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
+      glUseProgram(0);
+      glBindVertexArray(0);
     }
 
+//    for (struct object * obj = objects; obj != object_current; obj++) {
+//
+//      glBindVertexArray(obj->vao);
+//      glUseProgram(obj->program);
+//
+//      shader_set_int(obj->program, "material.diffuse", 0);
+//      shader_set_int(obj->program, "material.specular", 1);
+//      shader_set_v3(obj->program, "light.position", camera_position);
+//      shader_set_v3(obj->program, "light.direction", camera_front);
+//      shader_set_v3(obj->program, "position_view", camera_position);
+//      shader_set_m4(obj->program, "view", view);
+//      shader_set_m4(obj->program, "projection", projection);
+//      v3 color_light = {1.0f, 1.0f, 1.0f};
+//      shader_set_v3(obj->program, "light.specular", color_light);
+//      shader_set_v3(obj->program, "light.ambient", color_diffuse);
+//      vec3_scale(color_light, color_light, 0.8f);
+//      shader_set_v3(obj->program, "light.diffuse", color_light);
+//
+//      glActiveTexture(GL_TEXTURE0);
+//      glBindTexture(GL_TEXTURE_2D, texture_diffuse);
+//      glActiveTexture(GL_TEXTURE1);
+//      glBindTexture(GL_TEXTURE_2D, texture_specular);
+//
+//      glDrawArrays(GL_TRIANGLES, 0, 36);
+//      glBindVertexArray(0);
+//      glUseProgram(0);
+//
+//    }
+
     glUseProgram(program_lamp);
+    glBindVertexArray(vao_gltf_cube);
 
     shader_set_m4(program_lamp, "view", view);
     shader_set_m4(program_lamp, "projection", projection);
@@ -618,6 +702,18 @@ main(void)
       (vec3){1.0f, 0.0f, 0.0f}
     );
 
+    if (!flags_get(SPACE_TOGGLE)) {
+      if (pos_new_values){
+        object_current->model[3][0] = view[3][0];
+        object_current->model[3][1] = view[3][1];
+        object_current->model[3][2] = 0.0f;
+        pos_new_values = GL_FALSE;
+        object_current++;
+      }
+    } else {
+      pos_new_values = GL_TRUE;
+    }
+
     snprintf(buffer_char,
       size_buffer_char,
       "Shift down: %s",
@@ -659,8 +755,16 @@ main(void)
     );
 
     if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
-      printf("Create a new crate.\n");
+      if (object_current < objects+NUM_OBJECTS) {
+        object_current++;
+      }
       statuses_buttons[GLFW_KEY_C].processed = GL_TRUE;
+    }
+    if (flags_get(DOWN_D) && !statuses_buttons[GLFW_KEY_G].processed) {
+      if (object_current > objects) {
+        object_current--;
+      }
+      statuses_buttons[GLFW_KEY_G].processed = GL_TRUE;
     }
 
     glUseProgram(0);
