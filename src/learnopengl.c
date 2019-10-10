@@ -12,8 +12,6 @@ float time_current = 0.0f;
 float last_x = 400;
 float last_y = 300;
 
-GLboolean pos_new_values = GL_FALSE;
-
 float yaw = -90.0f;
 float pitch = 0.0f;
 
@@ -37,14 +35,13 @@ struct status_button {
 struct status_button statuses_buttons[128] = {0};
 
 struct object {
-  GLuint program;
-  GLuint vao;
   mat4x4 model;
 };
 
 #define NUM_OBJECTS 256
 struct object objects[NUM_OBJECTS] = {0};
 struct object * object_current = objects;
+struct object * obj_moving = NULL;
 
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
@@ -540,20 +537,25 @@ main(void)
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
-  for (int i=0; i<10; i++) {
-    object_current->vao = vao_gltf_cube;
-    object_current->program = program_obj;
-    mat4x4_identity(object_current->model);
-    m4_translate(
-      object_current->model,
-      object_current->model,
-      positions_cube[i]
-    );
-    object_current++;
-  }
+//  for (int i=0; i<10; i++) {
+//    object_current->vao = vao_gltf_cube;
+//    object_current->program = program_obj;
+//    mat4x4_identity(object_current->model);
+//    m4_translate(
+//      object_current->model,
+//      object_current->model,
+//      positions_cube[i]
+//    );
+//    object_current++;
+//  }
+//  object_current--;
 
   srand(time(NULL));
   rand(); // Skip first value.
+
+  for (int ii=0; ii<NUM_OBJECTS; ii++) {
+    mat4x4_identity((object_current+ii)->model);
+  }
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -611,18 +613,18 @@ main(void)
     //  glDrawArrays(GL_TRIANGLES, 0, 36);
     //}
 
-    for (struct object * object = objects; object != object_current; object++) {
+    glUseProgram(program_obj);
+    glBindVertexArray(vao_gltf_cube);
+    for (struct object * object = objects; object < object_current; object++) {
 //      mat4x4_identity(model);
 //      m4_translate(model, model, positions_cube[i]);
 //      float angle = 20.0f * i++;
 //      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
-      glUseProgram(object->program);
-      glBindVertexArray(object->vao);
-      shader_set_m4(object->program, "model", object->model);
+      shader_set_m4(program_obj, "model", object->model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
-      glUseProgram(0);
-      glBindVertexArray(0);
     }
+    glUseProgram(0);
+    glBindVertexArray(0);
 
 //    for (struct object * obj = objects; obj != object_current; obj++) {
 //
@@ -702,16 +704,17 @@ main(void)
       (vec3){1.0f, 0.0f, 0.0f}
     );
 
-    if (!flags_get(SPACE_TOGGLE)) {
-      if (pos_new_values){
-        object_current->model[3][0] = view[3][0];
-        object_current->model[3][1] = view[3][1];
-        object_current->model[3][2] = 0.0f;
-        pos_new_values = GL_FALSE;
-        object_current++;
+    if (flags_get(SPACE_TOGGLE)) {
+      if (obj_moving == NULL) {
+        obj_moving = object_current++;
       }
+      obj_moving->model[3][0] = camera_position[0];
+      obj_moving->model[3][1] = camera_position[1];
+      obj_moving->model[3][2] = -3.0f;
     } else {
-      pos_new_values = GL_TRUE;
+      if (obj_moving) {
+        obj_moving = NULL;
+      }
     }
 
     snprintf(buffer_char,
@@ -755,13 +758,13 @@ main(void)
     );
 
     if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
-      if (object_current < objects+NUM_OBJECTS) {
+      if (object_current < (objects+NUM_OBJECTS)) {
         object_current++;
       }
       statuses_buttons[GLFW_KEY_C].processed = GL_TRUE;
     }
     if (flags_get(DOWN_D) && !statuses_buttons[GLFW_KEY_G].processed) {
-      if (object_current > objects) {
+      if ((object_current+1) > objects) {
         object_current--;
       }
       statuses_buttons[GLFW_KEY_G].processed = GL_TRUE;
