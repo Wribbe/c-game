@@ -34,14 +34,10 @@ struct status_button {
 
 struct status_button statuses_buttons[128] = {0};
 
-struct object {
-  mat4x4 model;
-};
-
 #define NUM_OBJECTS 256
-struct object objects[NUM_OBJECTS] = {0};
-struct object * object_current = objects;
-struct object * obj_moving = NULL;
+GLuint obj_last = 0;
+GLuint obj_moving = 0;
+mat4x4 obj_models[NUM_OBJECTS] = {0};
 
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
@@ -554,7 +550,7 @@ main(void)
   rand(); // Skip first value.
 
   for (int ii=0; ii<NUM_OBJECTS; ii++) {
-    mat4x4_identity((object_current+ii)->model);
+    mat4x4_identity(obj_models[ii]);
   }
 
   while (!glfwWindowShouldClose(window)) {
@@ -615,12 +611,12 @@ main(void)
 
     glUseProgram(program_obj);
     glBindVertexArray(vao_gltf_cube);
-    for (struct object * object = objects; object < object_current; object++) {
+    for (int ii=0; ii < obj_last; ii++) {
 //      mat4x4_identity(model);
 //      m4_translate(model, model, positions_cube[i]);
 //      float angle = 20.0f * i++;
 //      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
-      shader_set_m4(program_obj, "model", object->model);
+      shader_set_m4(program_obj, "model", obj_models[ii]);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     glUseProgram(0);
@@ -705,15 +701,15 @@ main(void)
     );
 
     if (flags_get(SPACE_TOGGLE)) {
-      if (obj_moving == NULL) {
-        obj_moving = object_current++;
+      if (obj_moving == obj_last && obj_last<NUM_OBJECTS) {
+        obj_moving = obj_last++;
       }
-      obj_moving->model[3][0] = camera_position[0];
-      obj_moving->model[3][1] = camera_position[1];
-      obj_moving->model[3][2] = -3.0f;
+      obj_models[obj_moving][3][0] = camera_position[0];
+      obj_models[obj_moving][3][1] = camera_position[1];
+      obj_models[obj_moving][3][2] = -3.0f;
     } else {
-      if (obj_moving) {
-        obj_moving = NULL;
+      if (obj_moving != obj_last) {
+        obj_moving = obj_last;
       }
     }
 
@@ -758,14 +754,16 @@ main(void)
     );
 
     if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
-      if (object_current < (objects+NUM_OBJECTS)) {
-        object_current++;
+      if (obj_last < NUM_OBJECTS) {
+        obj_last++;
+        obj_moving = obj_last;
       }
       statuses_buttons[GLFW_KEY_C].processed = GL_TRUE;
     }
     if (flags_get(DOWN_D) && !statuses_buttons[GLFW_KEY_G].processed) {
-      if ((object_current+1) > objects) {
-        object_current--;
+      if (obj_last > 0) {
+        obj_last--;
+        obj_moving = obj_last;
       }
       statuses_buttons[GLFW_KEY_G].processed = GL_TRUE;
     }
