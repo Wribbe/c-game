@@ -581,19 +581,9 @@ main(void)
       obj_models[obj_moving][3][0] = camera_position[0];
       obj_models[obj_moving][3][1] = camera_position[1];
       obj_models[obj_moving][3][2] = -3.0f;
-      printf("Set: %f,%f,%f\n",
-        obj_models[obj_moving][3][0],
-        obj_models[obj_moving][3][1],
-        obj_models[obj_moving][3][2]
-      );
     } else {
       if (obj_moving != obj_last) {
         obj_moving = obj_last;
-        printf("Read: %f,%f,%f\n",
-          obj_models[obj_last-1][3][0],
-          obj_models[obj_last-1][3][1],
-          obj_models[obj_last-1][3][2]
-        );
       }
     }
 
