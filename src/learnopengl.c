@@ -587,6 +587,10 @@ main(void)
       }
     }
 
+    for (int ii=0; ii<obj_last; ii++) {
+      obj_models[ii][3][1] -= time_delta * 0.7f;
+    }
+
 //    if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
 //      if (obj_last < NUM_OBJECTS) {
 //        obj_last++;
