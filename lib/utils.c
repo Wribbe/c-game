@@ -7,8 +7,8 @@
 char BUFFER_CHAR[SIZE_BUFFER_CHAR] = {0};
 struct character characters[NUM_CHARACTERS];
 
-GLuint SCREEN_WIDTH = 1920/4;
-GLuint SCREEN_HEIGHT = 1080/4;
+GLuint SCREEN_WIDTH = 1920/2;
+GLuint SCREEN_HEIGHT = 1080/2;
 GLfloat SCREEN_ASPECT = 0.0f;
 
 GLchar *
