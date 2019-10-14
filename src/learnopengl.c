@@ -574,6 +574,44 @@ main(void)
       0.1f, 100.0f
     );
 
+    if (flags_get(SPACE_TOGGLE)) {
+      if (obj_moving == obj_last && obj_last<NUM_OBJECTS) {
+        obj_last++;
+      }
+      obj_models[obj_moving][3][0] = camera_position[0];
+      obj_models[obj_moving][3][1] = camera_position[1];
+      obj_models[obj_moving][3][2] = -3.0f;
+      printf("Set: %f,%f,%f\n",
+        obj_models[obj_moving][3][0],
+        obj_models[obj_moving][3][1],
+        obj_models[obj_moving][3][2]
+      );
+    } else {
+      if (obj_moving != obj_last) {
+        obj_moving = obj_last;
+        printf("Read: %f,%f,%f\n",
+          obj_models[obj_last-1][3][0],
+          obj_models[obj_last-1][3][1],
+          obj_models[obj_last-1][3][2]
+        );
+      }
+    }
+
+//    if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
+//      if (obj_last < NUM_OBJECTS) {
+//        obj_last++;
+//        obj_moving = obj_last;
+//      }
+//      statuses_buttons[GLFW_KEY_C].processed = GL_TRUE;
+//    }
+    if (flags_get(DOWN_D) && !statuses_buttons[GLFW_KEY_G].processed) {
+      if (obj_last > 0) {
+        obj_last--;
+        obj_moving = obj_last;
+      }
+      statuses_buttons[GLFW_KEY_G].processed = GL_TRUE;
+    }
+
     glUseProgram(program_obj);
 
     shader_set_v3(program_obj, "position_view", camera_position);
@@ -700,19 +738,6 @@ main(void)
       (vec3){1.0f, 0.0f, 0.0f}
     );
 
-    if (flags_get(SPACE_TOGGLE)) {
-      if (obj_moving == obj_last && obj_last<NUM_OBJECTS) {
-        obj_moving = obj_last++;
-      }
-      obj_models[obj_moving][3][0] = camera_position[0];
-      obj_models[obj_moving][3][1] = camera_position[1];
-      obj_models[obj_moving][3][2] = -3.0f;
-    } else {
-      if (obj_moving != obj_last) {
-        obj_moving = obj_last;
-      }
-    }
-
     snprintf(buffer_char,
       size_buffer_char,
       "Shift down: %s",
@@ -753,20 +778,19 @@ main(void)
       (vec3){1.0f, 0.0f, 0.0f}
     );
 
-    if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
-      if (obj_last < NUM_OBJECTS) {
-        obj_last++;
-        obj_moving = obj_last;
-      }
-      statuses_buttons[GLFW_KEY_C].processed = GL_TRUE;
-    }
-    if (flags_get(DOWN_D) && !statuses_buttons[GLFW_KEY_G].processed) {
-      if (obj_last > 0) {
-        obj_last--;
-        obj_moving = obj_last;
-      }
-      statuses_buttons[GLFW_KEY_G].processed = GL_TRUE;
-    }
+    snprintf(buffer_char,
+      size_buffer_char,
+      "Num: %d",
+      obj_last
+    );
+
+    render_ui(
+      program_text,
+      buffer_char,
+      (vec2f){{{0.75f, 0.75f}}},
+      0.001f,
+      (vec3){1.0f, 0.0f, 0.0f}
+    );
 
     glUseProgram(0);
     glfwSwapBuffers(window);
