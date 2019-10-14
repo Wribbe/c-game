@@ -32,7 +32,7 @@ struct status_button {
   GLboolean processed;
 };
 
-struct status_button statuses_buttons[128] = {0};
+struct status_button statuses_buttons[GLFW_KEY_LAST] = {0};
 
 #define NUM_OBJECTS 256
 GLuint obj_last = 0;
