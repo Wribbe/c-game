@@ -153,6 +153,12 @@ flag_obj_clear(GLuint index, enum flag_obj flag)
   obj_flags[index] &= ~(1 << flag);
 }
 
+GLboolean
+obj_collides(GLuint index)
+{
+  return GL_FALSE;
+}
+
 void
 processingInput(GLFWwindow * window)
 {
@@ -636,7 +642,7 @@ main(void)
       if (flag_obj_get(ii, FLAG_OBJ_GRAVITY)) {
         obj_models[ii][3][1] -= time_delta * 1.3f;
       }
-      if (obj_models[ii][3][1] < Y_FLOOR) {
+      if (obj_models[ii][3][1] < Y_FLOOR || obj_collides(ii)) {
         flag_obj_clear(ii, FLAG_OBJ_GRAVITY);
       }
     }
