@@ -8,6 +8,7 @@ vec3 camera_target = {0.0f, 0.0f, 0.0f};
 float time_delta = 0.0f;
 float time_last_frame = 0.0f;
 float time_current = 0.0f;
+float Y_FLOOR = -1.0f;
 
 float last_x = 400;
 float last_y = 300;
@@ -38,6 +39,7 @@ struct status_button statuses_buttons[GLFW_KEY_LAST] = {0};
 GLuint obj_last = 0;
 GLuint obj_moving = 0;
 mat4x4 obj_models[NUM_OBJECTS] = {0};
+uint32_t obj_flags[NUM_OBJECTS] = {0};
 
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
@@ -57,6 +59,11 @@ enum flag {
   DOWN_C,
   DOWN_D,
   NUM_FLAGS,
+};
+
+enum flag_obj {
+  FLAG_OBJ_GRAVITY,
+  NUM_OBJ_FLAGS,
 };
 
 void
@@ -107,6 +114,43 @@ flag_change(GLuint key, enum flag flag) {
     statuses_buttons[key].changed = GL_FALSE;
     statuses_buttons[key].processed = GL_FALSE;
   }
+}
+
+GLboolean
+flag_obj_get(GLuint index, enum flag_obj flag)
+{
+  if (flag >= NUM_OBJ_FLAGS) {
+    return GL_FALSE;
+  }
+  int mask = 1 << flag;
+  return (obj_flags[index] & mask) >> flag;
+}
+
+void
+flag_obj_set(GLuint index, enum flag_obj flag)
+{
+  if (flag >= NUM_OBJ_FLAGS) {
+    return;
+  }
+  obj_flags[index] |= (1 << flag);
+}
+
+void
+flag_obj_toggle(GLuint index, enum flag_obj flag)
+{
+  if (flag >= NUM_OBJ_FLAGS) {
+    return;
+  }
+  obj_flags[index] ^= (1 << flag);
+}
+
+void
+flag_obj_clear(GLuint index, enum flag_obj flag)
+{
+  if (flag >= NUM_OBJ_FLAGS) {
+    return;
+  }
+  obj_flags[index] &= ~(1 << flag);
 }
 
 void
@@ -551,6 +595,7 @@ main(void)
 
   for (int ii=0; ii<NUM_OBJECTS; ii++) {
     mat4x4_identity(obj_models[ii]);
+    flag_obj_set(ii, FLAG_OBJ_GRAVITY);
   }
 
   while (!glfwWindowShouldClose(window)) {
@@ -588,7 +633,12 @@ main(void)
     }
 
     for (int ii=0; ii<obj_last; ii++) {
-      obj_models[ii][3][1] -= time_delta * 0.7f;
+      if (flag_obj_get(ii, FLAG_OBJ_GRAVITY)) {
+        obj_models[ii][3][1] -= time_delta * 1.3f;
+      }
+      if (obj_models[ii][3][1] < Y_FLOOR) {
+        flag_obj_clear(ii, FLAG_OBJ_GRAVITY);
+      }
     }
 
 //    if (flags_get(DOWN_C) && !statuses_buttons[GLFW_KEY_C].processed) {
