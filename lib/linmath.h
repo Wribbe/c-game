@@ -156,11 +156,16 @@ static inline void mat4x4_mul(mat4x4 M, mat4x4 a, mat4x4 b)
 static inline void mat4x4_mul_vec4(vec4 r, mat4x4 M, vec4 v)
 {
 	int i, j;
+  vec4 t = {0.0f};
 	for(j=0; j<4; ++j) {
-		r[j] = 0.f;
-		for(i=0; i<4; ++i)
-			r[j] += M[i][j] * v[i];
+		t[j] = 0.0f;
+		for(i=0; i<4; ++i) {
+			t[j] += M[i][j] * v[i];
+    }
 	}
+  for (int ii=0; ii<3; ii++) {
+    r[ii] = t[ii];
+  }
 }
 static inline void mat4x4_translate(mat4x4 T, float x, float y, float z)
 {

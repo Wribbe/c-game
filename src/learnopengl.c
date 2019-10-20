@@ -33,13 +33,23 @@ struct status_button {
   GLboolean processed;
 };
 
+struct bound_box {
+  float p1[2];
+  float p2[2];
+};
+
 struct status_button statuses_buttons[GLFW_KEY_LAST] = {0};
 
 #define NUM_OBJECTS 256
 GLuint obj_last = 0;
 GLuint obj_moving = 0;
 mat4x4 obj_models[NUM_OBJECTS] = {0};
+struct bound_box obj_bounds[NUM_OBJECTS] = {0};
 uint32_t obj_flags[NUM_OBJECTS] = {0};
+
+GLuint vao_debug;
+GLuint vbo_debug;
+GLuint program_debug_points;
 
 void
 camera_reorient(GLfloat offset_x, GLfloat offset_y);
@@ -154,8 +164,54 @@ flag_obj_clear(GLuint index, enum flag_obj flag)
 }
 
 GLboolean
+_objs_collides(GLuint a, GLuint b)
+{
+  struct bound_box bound_a = obj_bounds[a];
+  struct bound_box bound_b = obj_bounds[b];
+
+  vec4 pa1 = {bound_a.p1[0], bound_a.p1[1], 0.0f, 1.0f};
+  vec4 pa2 = {bound_a.p2[0], bound_a.p2[1], 0.0f, 1.0f};
+
+  vec4 pb1 = {bound_b.p1[0], bound_b.p1[1], 0.0f, 1.0f};
+  vec4 pb2 = {bound_b.p2[0], bound_b.p2[1], 0.0f, 1.0f};
+
+  mat4x4_mul_vec4(pa1, obj_models[a], pa1);
+  mat4x4_mul_vec4(pa2, obj_models[a], pa2);
+
+  mat4x4_mul_vec4(pb1, obj_models[b], pb1);
+  mat4x4_mul_vec4(pb2, obj_models[b], pb2);
+
+//  GLfloat data_debug[] = {
+//    pa1[0], pa1[1], pa1[2],
+//    pa2[0], pa2[1], pa2[2],
+//    pb1[0], pb1[1], pb1[2],
+//    pb2[0], pb2[1], pb2[2]
+//  };
+
+  if (pa1[0] >= pb1[0] && pa1[0] <= pb2[0]) {
+    printf("pa1[0]:%f pb1[0]:%f pa1[0]:%f bp2[0]:%f\n",
+      pa1[0],
+      pb1[0],
+      pa1[0],
+      pb2[0]
+    );
+    return GL_TRUE;
+  }
+  return GL_FALSE;
+}
+
+GLboolean
 obj_collides(GLuint index)
 {
+  return GL_FALSE;
+  for (int jj=0; jj<obj_last; jj++) {
+    if (jj == index) {
+      continue;
+    }
+    if (_objs_collides(index, jj)) {
+      return GL_TRUE;
+    }
+  }
   return GL_FALSE;
 }
 
@@ -386,6 +442,8 @@ main(void)
 
   glfwSetFramebufferSizeCallback(window, callback_frabuffer_size);
 
+  glEnable(GL_PROGRAM_POINT_SIZE);
+
   GLuint program_obj = program_create(
     "src/shaders/obj.vert",
     "src/shaders/obj.frag"
@@ -394,6 +452,11 @@ main(void)
   GLuint program_lamp = program_create(
     "src/shaders/obj.vert",
     "src/shaders/light.frag"
+  );
+
+  program_debug_points = program_create(
+    "src/shaders/debug_points.vert",
+    "src/shaders/debug_points.frag"
   );
 
   cgltf_options options = {0};
@@ -471,12 +534,12 @@ main(void)
 
   glBindVertexArray(0);
 
-  GLuint VAO_light = 0;
-  glGenVertexArrays(1, &VAO_light);
-  glBindVertexArray(VAO_light);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
-  glEnableVertexAttribArray(0);
+//  GLuint VAO_light = 0;
+//  glGenVertexArrays(1, &VAO_light);
+//  glBindVertexArray(VAO_light);
+//  glBindBuffer(GL_ARRAY_BUFFER, vbo_gltf_cube);
+//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), 0);
+//  glEnableVertexAttribArray(0);
 
   mat4x4 model, view, projection;
   mat4x4_identity(model);
@@ -599,10 +662,38 @@ main(void)
   srand(time(NULL));
   rand(); // Skip first value.
 
-  for (int ii=0; ii<NUM_OBJECTS; ii++) {
-    mat4x4_identity(obj_models[ii]);
-    flag_obj_set(ii, FLAG_OBJ_GRAVITY);
+  for (int jj=0; jj<NUM_OBJECTS; jj++) {
+    mat4x4_identity(obj_models[jj]);
+    flag_obj_set(jj, FLAG_OBJ_GRAVITY);
+    obj_bounds[jj].p1[0] = -1.0f;
+    obj_bounds[jj].p1[1] = -1.0f;
+    obj_bounds[jj].p2[0] =  1.0f;
+    obj_bounds[jj].p2[1] =  1.0f;
   }
+
+//  glGenVertexArrays(1, &vao_debug);
+//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), (void*)0);
+//  glEnableVertexAttribArray(0);
+//  glBindVertexArray(vao_debug);
+
+  GLfloat data_debug[] = {
+    0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f,
+  };
+
+  glGenBuffers(1, &vbo_debug);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_debug);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    sizeof(data_debug),
+    data_debug,
+    GL_DYNAMIC_DRAW
+  );
+
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -638,12 +729,12 @@ main(void)
       }
     }
 
-    for (int ii=0; ii<obj_last; ii++) {
-      if (flag_obj_get(ii, FLAG_OBJ_GRAVITY)) {
-        obj_models[ii][3][1] -= time_delta * 1.3f;
+    for (int jj=0; jj<obj_last; jj++) {
+      if (flag_obj_get(jj, FLAG_OBJ_GRAVITY)) {
+        obj_models[jj][3][1] -= time_delta * 1.3f;
       }
-      if (obj_models[ii][3][1] < Y_FLOOR || obj_collides(ii)) {
-        flag_obj_clear(ii, FLAG_OBJ_GRAVITY);
+      if (obj_models[jj][3][1] < Y_FLOOR || obj_collides(jj)) {
+        flag_obj_clear(jj, FLAG_OBJ_GRAVITY);
       }
     }
 
@@ -697,15 +788,19 @@ main(void)
     //  glDrawArrays(GL_TRIANGLES, 0, 36);
     //}
 
-    glUseProgram(program_obj);
-    glBindVertexArray(vao_gltf_cube);
-    for (int ii=0; ii < obj_last; ii++) {
+    GLuint program_current = program_obj;
+    glUseProgram(program_current);
+    shader_set_m4(program_current, "view", view);
+    shader_set_m4(program_current, "projection", projection);
+//    glBindVertexArray(vao_gltf_cube);
+    for (int jj=0; jj < obj_last; jj++) {
 //      mat4x4_identity(model);
 //      m4_translate(model, model, positions_cube[i]);
 //      float angle = 20.0f * i++;
 //      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
-      shader_set_m4(program_obj, "model", obj_models[ii]);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      //shader_set_m4(program_lamp, "model", obj_models[jj]);
+      shader_set_m4(program_current, "model", obj_models[jj]);
+      //glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     glUseProgram(0);
     glBindVertexArray(0);
@@ -749,13 +844,8 @@ main(void)
       mat4x4_identity(model);
       m4_scale(model, model, 0.2f);
       m4_translate(model, model, positions_light_point[i]);
-      glUniformMatrix4fv(
-          glGetUniformLocation(program_lamp, "model"),
-          1,
-          GL_FALSE,
-          &model[0][0]
-      );
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      shader_set_m4(program_lamp, "model", model);
+      //glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     timespec_get(&time_current, TIME_UTC);
@@ -842,9 +932,83 @@ main(void)
       (vec3){1.0f, 0.0f, 0.0f}
     );
 
-    glUseProgram(0);
-    glfwSwapBuffers(window);
+//    glUseProgram(program_debug_points);
+//    glBindVertexArray(vao_debug);
+//    glBindBuffer(GL_ARRAY_BUFFER, vbo_debug);
+//
+//    shader_set_m4(program_debug_points, "view", view);
+//    shader_set_m4(program_debug_points, "projection", projection);
+//
+//    mat4x4_identity(model);
+//
+//    //for (int jj=0; jj<obj_last; jj++) {
+//    for (int jj=0; jj<5; jj++) {
+//      printf("%d\n", jj);
+//      glBufferSubData(
+//        GL_ARRAY_BUFFER,
+//        0,
+//        sizeof(data_debug),
+//        data_debug
+//      );
+//      shader_set_m4(program_debug_points, "model", model);
+//      glDrawArrays(GL_POINTS, 0, 3*4);
+//    }
+//
+    program_current = program_debug_points;
+//    program_current = program_lamp;
+    glUseProgram(program_current);
+//    glBindVertexArray(vao_gltf_cube);
 
+    shader_set_m4(program_current, "view", view);
+    shader_set_m4(program_current, "projection", projection);
+
+
+    GLuint vao_test = 0;
+    glGenVertexArrays(1, &vao_test);
+    glBindVertexArray(vao_test);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+      0,
+      3,
+      GL_FLOAT,
+      GL_FALSE,
+      0,
+      (void*)0
+    );
+
+ //   GLuint vbo_test = 0;
+ //   glGenBuffers(1, &vbo_test);
+ //   glBindBuffer(GL_ARRAY_BUFFER, vbo_test);
+ //   glBufferData(
+ //     GL_ARRAY_BUFFER,
+ //     sizeof(GLfloat)*3,
+ //     NULL,
+ //     GL_DYNAMIC_DRAW
+ //   );
+
+    glDrawArrays(GL_POINTS, 0, 9);
+    for (float ii=-1.0; ii<1; ii += 0.1f) {
+      for (float jj=-1.0; jj<1; jj += 0.1f) {
+        for (float kk=-1.0; kk<1; kk += 0.1f) {
+          //GLfloat data[] = {ii/10.0f, jj/10.0f, kk/10.0f};
+//          GLfloat data[] = {-ii, -jj, -kk};
+          //printf("%f, %f, %f\n", ii/100.0f, jj/100.0f, kk/100.0f);
+//          glBufferSubData(
+//            GL_ARRAY_BUFFER,
+//            0,
+//            sizeof(data),
+//            data
+//          );
+//          glDrawArrays(GL_POINTS, 0, 9);
+        }
+      }
+    }
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
+
+    glfwSwapBuffers(window);
   }
 
   glfwDestroyWindow(window);
