@@ -34,8 +34,8 @@ struct status_button {
 };
 
 struct bound_box {
-  float p1[2];
-  float p2[2];
+  vec3 p1;
+  vec3 p2;
 };
 
 struct status_button statuses_buttons[GLFW_KEY_LAST] = {0};
@@ -662,13 +662,15 @@ main(void)
   srand(time(NULL));
   rand(); // Skip first value.
 
-  for (int jj=0; jj<NUM_OBJECTS; jj++) {
-    mat4x4_identity(obj_models[jj]);
-    flag_obj_set(jj, FLAG_OBJ_GRAVITY);
-    obj_bounds[jj].p1[0] = -1.0f;
-    obj_bounds[jj].p1[1] = -1.0f;
-    obj_bounds[jj].p2[0] =  1.0f;
-    obj_bounds[jj].p2[1] =  1.0f;
+  for (int ii=0; ii<NUM_OBJECTS; ii++) {
+    mat4x4_identity(obj_models[ii]);
+    flag_obj_set(ii, FLAG_OBJ_GRAVITY);
+    obj_bounds[ii].p1[0] =  0.5f;
+    obj_bounds[ii].p1[1] =  0.5f;
+    obj_bounds[ii].p1[2] =  0.5f;
+    obj_bounds[ii].p2[0] = -0.5f;
+    obj_bounds[ii].p2[1] = -0.5f;
+    obj_bounds[ii].p2[2] = -0.5f;
   }
 
 //  glGenVertexArrays(1, &vao_debug);
@@ -844,7 +846,7 @@ main(void)
 //      mat4x4_rotate(model, model, 1.0f, 0.3f, 0.5f, to_rad(angle));
       //shader_set_m4(program_lamp, "model", obj_models[jj]);
       shader_set_m4(program_current, "model", obj_models[jj]);
-      //glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     glUseProgram(0);
     glBindVertexArray(0);
@@ -889,7 +891,7 @@ main(void)
       m4_scale(model, model, 0.2f);
       m4_translate(model, model, positions_light_point[i]);
       shader_set_m4(program_lamp, "model", model);
-      //glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     timespec_get(&time_current, TIME_UTC);
@@ -1005,15 +1007,15 @@ main(void)
 
     mat4x4_identity(model);
     shader_set_m4(program_current, "model", model);
-//    shader_set_m4(program_current, "view", view);
-//    shader_set_m4(program_current, "projection", projection);
+    shader_set_m4(program_current, "view", view);
+    shader_set_m4(program_current, "projection", projection);
 
     glBindVertexArray(vao_test);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_test);
 
     glBufferData(
       GL_ARRAY_BUFFER,
-      sizeof(GLfloat)*4*3,
+      sizeof(GLfloat)*8*3,
       NULL,
       GL_DYNAMIC_DRAW
     );
@@ -1028,18 +1030,48 @@ main(void)
     );
     glEnableVertexAttribArray(0);
 
-    for (float ii=-1.0f; ii<=1.0f; ii += 1.0f/10.0f) {
-      for (float jj=-1.0f; jj<=1.0f; jj += 1.0f/10.0f) {
-        GLfloat data[] = {
-          ii, jj, 0.0f,
-          ii, jj, 0.0f,
-          ii, jj, 0.0f,
-          ii, jj, 0.0f,
-        };
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
-        glDrawArrays(GL_POINTS, 0, 4);
+    for (GLuint ii=0; ii<obj_last; ii++) {
+      struct bound_box bound = obj_bounds[ii];
+
+      vec4 p1 = {0};
+      vec4 p2 = {0};
+      for (int ii=0; ii<3; ii++) {
+        p1[ii] = bound.p1[ii];
+        p2[ii] = bound.p2[ii];
       }
+      p1[3] = 1.0f;
+      p2[3] = 1.0f;
+
+      mat4x4_mul_vec4(p1, obj_models[ii], p1);
+      mat4x4_mul_vec4(p2, obj_models[ii], p2);
+
+      GLfloat data[] = {
+        p1[0], p1[1], p1[2],
+        p2[0], p1[1], p1[2],
+        p2[0], p2[1], p1[2],
+        p1[0], p2[1], p1[2],
+
+        p1[0], p1[1], p2[2],
+        p2[0], p1[1], p2[2],
+        p2[0], p2[1], p2[2],
+        p1[0], p2[1], p2[2],
+      };
+      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
+      glDrawArrays(GL_POINTS, 0, 8);
     }
+
+//    for (float ii=-1.0f; ii<=1.0f; ii += 1.0f/10.0f) {
+//      for (float jj=-1.0f; jj<=1.0f; jj += 1.0f/10.0f) {
+//        GLfloat data[] = {
+//          ii-0.01f, jj+0.01f, +jj,
+//          ii-0.01f, jj-0.01f, -jj,
+//          ii+0.01f, jj+0.01f, -jj,
+//          ii+0.01f, jj-0.01f, +jj,
+//        };
+//        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
+//        glDrawArrays(GL_POINTS, 0, 4);
+//      }
+//    }
 
 //    glDrawArrays(GL_POINTS, 0, 9);
 //    for (float ii=-1.0; ii<1; ii += 0.1f) {
