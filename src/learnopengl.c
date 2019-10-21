@@ -695,6 +695,45 @@ main(void)
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
+  GLuint vao_basic = 0;
+  GLuint vbo_basic = 0;
+
+  GLuint program_basic = program_create(
+    "src/shaders/basic.vert",
+    "src/shaders/basic.frag"
+  );
+
+  GLfloat data_basic[] = {
+   -0.5f, 0.5f, 0.0f,
+   -0.5f,-0.5f, 0.0f,
+    0.5f,-0.5f, 0.0f,
+  };
+
+  glGenVertexArrays(1, &vao_basic);
+  glGenBuffers(1, &vbo_basic);
+
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_debug);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    sizeof(data_basic),
+    data_basic,
+    GL_STATIC_DRAW
+  );
+
+  glBindVertexArray(vao_basic);
+  glVertexAttribPointer(
+    0,
+    3,
+    GL_FLOAT,
+    GL_FALSE,
+    0,
+    (void*)0
+  );
+  glEnableVertexAttribArray(0);
+
+  glBindVertexArray(0);
+
   while (!glfwWindowShouldClose(window)) {
 
     glfwPollEvents();
@@ -966,15 +1005,15 @@ main(void)
     GLuint vao_test = 0;
     glGenVertexArrays(1, &vao_test);
     glBindVertexArray(vao_test);
-    glEnableVertexAttribArray(0);
     glVertexAttribPointer(
       0,
       3,
       GL_FLOAT,
       GL_FALSE,
-      0,
+      3*sizeof(GLfloat),
       (void*)0
     );
+    glEnableVertexAttribArray(0);
 
  //   GLuint vbo_test = 0;
  //   glGenBuffers(1, &vbo_test);
@@ -986,11 +1025,11 @@ main(void)
  //     GL_DYNAMIC_DRAW
  //   );
 
-    glDrawArrays(GL_POINTS, 0, 9);
-    for (float ii=-1.0; ii<1; ii += 0.1f) {
-      for (float jj=-1.0; jj<1; jj += 0.1f) {
-        for (float kk=-1.0; kk<1; kk += 0.1f) {
-          //GLfloat data[] = {ii/10.0f, jj/10.0f, kk/10.0f};
+//    glDrawArrays(GL_POINTS, 0, 9);
+//    for (float ii=-1.0; ii<1; ii += 0.1f) {
+//      for (float jj=-1.0; jj<1; jj += 0.1f) {
+//        for (float kk=-1.0; kk<1; kk += 0.1f) {
+//          //GLfloat data[] = {ii/10.0f, jj/10.0f, kk/10.0f};
 //          GLfloat data[] = {-ii, -jj, -kk};
           //printf("%f, %f, %f\n", ii/100.0f, jj/100.0f, kk/100.0f);
 //          glBufferSubData(
@@ -1000,9 +1039,14 @@ main(void)
 //            data
 //          );
 //          glDrawArrays(GL_POINTS, 0, 9);
-        }
-      }
-    }
+//        }
+//      }
+//    }
+
+    glUseProgram(program_basic);
+    glBindVertexArray(vao_basic);
+    glDrawArrays(GL_TRIANGLES, 0, 9);
+    glBindVertexArray(0);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
