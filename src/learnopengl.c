@@ -695,44 +695,49 @@ main(void)
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+//  GLuint vao_basic = 0;
+//  GLuint vbo_basic = 0;
 
-  GLuint vao_basic = 0;
-  GLuint vbo_basic = 0;
+//  GLuint program_basic = program_create(
+//    "src/shaders/basic.vert",
+//    "src/shaders/basic.frag"
+//  );
 
-  GLuint program_basic = program_create(
-    "src/shaders/basic.vert",
-    "src/shaders/basic.frag"
-  );
+//  GLfloat data_basic[] = {
+//   -0.5f, 0.5f, 0.0f,
+//   -0.5f,-0.5f, 0.0f,
+//    0.5f,-0.5f, 0.0f,
+//  };
+//
+//  glGenVertexArrays(1, &vao_basic);
+//  glGenBuffers(1, &vbo_basic);
+//
+//  glBindVertexArray(vao_basic);
+//  glBindBuffer(GL_ARRAY_BUFFER, vbo_debug);
+//
+//  glVertexAttribPointer(
+//    0,
+//    3,
+//    GL_FLOAT,
+//    GL_FALSE,
+//    0,
+//    (void*)0
+//  );
+//  glBufferData(
+//    GL_ARRAY_BUFFER,
+//    sizeof(data_basic),
+//    data_basic,
+//    GL_STATIC_DRAW
+//  );
+//  glEnableVertexAttribArray(0);
+//
+//
+//  glBindVertexArray(0);
 
-  GLfloat data_basic[] = {
-   -0.5f, 0.5f, 0.0f,
-   -0.5f,-0.5f, 0.0f,
-    0.5f,-0.5f, 0.0f,
-  };
-
-  glGenVertexArrays(1, &vao_basic);
-  glGenBuffers(1, &vbo_basic);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_debug);
-  glBufferData(
-    GL_ARRAY_BUFFER,
-    sizeof(data_basic),
-    data_basic,
-    GL_STATIC_DRAW
-  );
-
-  glBindVertexArray(vao_basic);
-  glVertexAttribPointer(
-    0,
-    3,
-    GL_FLOAT,
-    GL_FALSE,
-    0,
-    (void*)0
-  );
-  glEnableVertexAttribArray(0);
-
-  glBindVertexArray(0);
+  GLuint vbo_test = 0;
+  GLuint vao_test = 0;
+  glGenVertexArrays(1, &vao_test);
+  glGenBuffers(1, &vbo_test);
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -998,32 +1003,43 @@ main(void)
     glUseProgram(program_current);
 //    glBindVertexArray(vao_gltf_cube);
 
-    shader_set_m4(program_current, "view", view);
-    shader_set_m4(program_current, "projection", projection);
+    mat4x4_identity(model);
+    shader_set_m4(program_current, "model", model);
+//    shader_set_m4(program_current, "view", view);
+//    shader_set_m4(program_current, "projection", projection);
 
-
-    GLuint vao_test = 0;
-    glGenVertexArrays(1, &vao_test);
     glBindVertexArray(vao_test);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_test);
+
+    glBufferData(
+      GL_ARRAY_BUFFER,
+      sizeof(GLfloat)*4*3,
+      NULL,
+      GL_DYNAMIC_DRAW
+    );
+
     glVertexAttribPointer(
       0,
       3,
       GL_FLOAT,
       GL_FALSE,
-      3*sizeof(GLfloat),
+      0,
       (void*)0
     );
     glEnableVertexAttribArray(0);
 
- //   GLuint vbo_test = 0;
- //   glGenBuffers(1, &vbo_test);
- //   glBindBuffer(GL_ARRAY_BUFFER, vbo_test);
- //   glBufferData(
- //     GL_ARRAY_BUFFER,
- //     sizeof(GLfloat)*3,
- //     NULL,
- //     GL_DYNAMIC_DRAW
- //   );
+    for (float ii=-1.0f; ii<=1.0f; ii += 1.0f/10.0f) {
+      for (float jj=-1.0f; jj<=1.0f; jj += 1.0f/10.0f) {
+        GLfloat data[] = {
+          ii, jj, 0.0f,
+          ii, jj, 0.0f,
+          ii, jj, 0.0f,
+          ii, jj, 0.0f,
+        };
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
+        glDrawArrays(GL_POINTS, 0, 4);
+      }
+    }
 
 //    glDrawArrays(GL_POINTS, 0, 9);
 //    for (float ii=-1.0; ii<1; ii += 0.1f) {
@@ -1043,10 +1059,10 @@ main(void)
 //      }
 //    }
 
-    glUseProgram(program_basic);
-    glBindVertexArray(vao_basic);
-    glDrawArrays(GL_TRIANGLES, 0, 9);
-    glBindVertexArray(0);
+//    glUseProgram(program_basic);
+//    glBindVertexArray(vao_basic);
+//    glDrawArrays(GL_TRIANGLES, 0, 9);
+//    glBindVertexArray(0);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
