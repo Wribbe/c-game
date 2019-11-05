@@ -156,7 +156,7 @@ static inline void mat4x4_mul(mat4x4 M, mat4x4 a, mat4x4 b)
 static inline void mat4x4_mul_vec4(vec4 r, mat4x4 M, vec4 v)
 {
 	int i, j;
-  vec4 t = {0.0f};
+  vec4 t = {0};
 	for(j=0; j<4; ++j) {
 		t[j] = 0.0f;
 		for(i=0; i<4; ++i) {

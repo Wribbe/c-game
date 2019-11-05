@@ -34,8 +34,8 @@ struct status_button {
 };
 
 struct bound_box {
-  vec3 p1;
-  vec3 p2;
+  vec3 min;
+  vec3 max;
 };
 
 struct status_button statuses_buttons[GLFW_KEY_LAST] = {0};
@@ -166,44 +166,42 @@ flag_obj_clear(GLuint index, enum flag_obj flag)
 GLboolean
 _objs_collides(GLuint a, GLuint b)
 {
-  struct bound_box bound_a = obj_bounds[a];
-  struct bound_box bound_b = obj_bounds[b];
+  struct bound_box * ba = &obj_bounds[a];
+  struct bound_box * bb = &obj_bounds[b];
 
-  vec4 pa1 = {bound_a.p1[0], bound_a.p1[1], 0.0f, 1.0f};
-  vec4 pa2 = {bound_a.p2[0], bound_a.p2[1], 0.0f, 1.0f};
-
-  vec4 pb1 = {bound_b.p1[0], bound_b.p1[1], 0.0f, 1.0f};
-  vec4 pb2 = {bound_b.p2[0], bound_b.p2[1], 0.0f, 1.0f};
-
-  mat4x4_mul_vec4(pa1, obj_models[a], pa1);
-  mat4x4_mul_vec4(pa2, obj_models[a], pa2);
-
-  mat4x4_mul_vec4(pb1, obj_models[b], pb1);
-  mat4x4_mul_vec4(pb2, obj_models[b], pb2);
-
-//  GLfloat data_debug[] = {
-//    pa1[0], pa1[1], pa1[2],
-//    pa2[0], pa2[1], pa2[2],
-//    pb1[0], pb1[1], pb1[2],
-//    pb2[0], pb2[1], pb2[2]
-//  };
-
-  if (pa1[0] >= pb1[0] && pa1[0] <= pb2[0]) {
-    printf("pa1[0]:%f pb1[0]:%f pa1[0]:%f bp2[0]:%f\n",
-      pa1[0],
-      pb1[0],
-      pa1[0],
-      pb2[0]
-    );
-    return GL_TRUE;
+  if (ba->max[0] < bb->min[0] || ba->min[0] > bb->max[0]) {
+    return GL_FALSE;
   }
-  return GL_FALSE;
+  if (ba->max[1] < bb->min[1] || ba->min[1] > bb->max[1]) {
+    return GL_FALSE;
+  }
+  return GL_TRUE;
 }
+
+void
+obj_translate(GLuint index, vec3 pos)
+{
+  for (int ii=0; ii<3; ii++) {
+    obj_models[index][3][ii] += pos[ii];
+    obj_bounds[index].min[ii] += pos[ii];
+    obj_bounds[index].max[ii] += pos[ii];
+  }
+}
+
+void
+obj_translate_set(GLuint index, vec3 pos)
+{
+  vec3 t = {0};
+  for (int ii=0; ii<3; ii++) {
+    t[ii] = pos[ii]-obj_models[index][3][ii];
+  }
+  obj_translate(index, t);
+}
+
 
 GLboolean
 obj_collides(GLuint index)
 {
-  return GL_FALSE;
   for (int jj=0; jj<obj_last; jj++) {
     if (jj == index) {
       continue;
@@ -659,18 +657,18 @@ main(void)
 //  }
 //  object_current--;
 
-  srand(time(NULL));
-  rand(); // Skip first value.
+//  srand(time(NULL));
+//  rand(); // Skip first value.
 
   for (int ii=0; ii<NUM_OBJECTS; ii++) {
     mat4x4_identity(obj_models[ii]);
     flag_obj_set(ii, FLAG_OBJ_GRAVITY);
-    obj_bounds[ii].p1[0] =  0.5f;
-    obj_bounds[ii].p1[1] =  0.5f;
-    obj_bounds[ii].p1[2] =  0.5f;
-    obj_bounds[ii].p2[0] = -0.5f;
-    obj_bounds[ii].p2[1] = -0.5f;
-    obj_bounds[ii].p2[2] = -0.5f;
+    obj_bounds[ii].min[0] =  -0.5f;
+    obj_bounds[ii].min[1] =  -0.5f;
+    obj_bounds[ii].min[2] =  -0.5f;
+    obj_bounds[ii].max[0] =  0.5f;
+    obj_bounds[ii].max[1] =  0.5f;
+    obj_bounds[ii].max[2] =  0.5f;
   }
 
 //  glGenVertexArrays(1, &vao_debug);
@@ -766,9 +764,14 @@ main(void)
       if (obj_moving == obj_last && obj_last<NUM_OBJECTS) {
         obj_last++;
       }
-      obj_models[obj_moving][3][0] = camera_position[0];
-      obj_models[obj_moving][3][1] = camera_position[1];
-      obj_models[obj_moving][3][2] = -3.0f;
+      obj_translate_set(
+        obj_moving,
+        (vec3){
+          camera_position[0],
+          camera_position[1],
+          -3.0f
+        }
+      );
     } else {
       if (obj_moving != obj_last) {
         obj_moving = obj_last;
@@ -777,10 +780,13 @@ main(void)
 
     for (int jj=0; jj<obj_last; jj++) {
       if (flag_obj_get(jj, FLAG_OBJ_GRAVITY)) {
-        obj_models[jj][3][1] -= time_delta * 1.3f;
+        GLfloat grav = -time_delta * 1.3f;
+        obj_translate(jj, (vec3){0.0f, grav, 0.0f});
       }
       if (obj_models[jj][3][1] < Y_FLOOR || obj_collides(jj)) {
         flag_obj_clear(jj, FLAG_OBJ_GRAVITY);
+      } else {
+        flag_obj_set(jj, FLAG_OBJ_GRAVITY);
       }
     }
 
@@ -1031,30 +1037,17 @@ main(void)
     glEnableVertexAttribArray(0);
 
     for (GLuint ii=0; ii<obj_last; ii++) {
-      struct bound_box bound = obj_bounds[ii];
-
-      vec4 p1 = {0};
-      vec4 p2 = {0};
-      for (int ii=0; ii<3; ii++) {
-        p1[ii] = bound.p1[ii];
-        p2[ii] = bound.p2[ii];
-      }
-      p1[3] = 1.0f;
-      p2[3] = 1.0f;
-
-      mat4x4_mul_vec4(p1, obj_models[ii], p1);
-      mat4x4_mul_vec4(p2, obj_models[ii], p2);
-
+      struct bound_box * bound = &obj_bounds[ii];
       GLfloat data[] = {
-        p1[0], p1[1], p1[2],
-        p2[0], p1[1], p1[2],
-        p2[0], p2[1], p1[2],
-        p1[0], p2[1], p1[2],
+        bound->min[0], bound->min[1], bound->min[2],
+        bound->max[0], bound->min[1], bound->min[2],
+        bound->max[0], bound->max[1], bound->min[2],
+        bound->min[0], bound->max[1], bound->min[2],
 
-        p1[0], p1[1], p2[2],
-        p2[0], p1[1], p2[2],
-        p2[0], p2[1], p2[2],
-        p1[0], p2[1], p2[2],
+        bound->min[0], bound->min[1], bound->max[2],
+        bound->max[0], bound->min[1], bound->max[2],
+        bound->max[0], bound->max[1], bound->max[2],
+        bound->min[0], bound->max[1], bound->max[2],
       };
       glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
       glDrawArrays(GL_POINTS, 0, 8);
