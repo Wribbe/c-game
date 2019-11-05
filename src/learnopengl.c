@@ -420,6 +420,7 @@ main(void)
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     "Learnopengl",
+//    glfwGetPrimaryMonitor(),
     NULL,
     NULL
   );
@@ -640,7 +641,7 @@ main(void)
   size_t size_buffer_char = 512;
   char buffer_char[size_buffer_char];
 
-  glfwSwapInterval(-1);
+  glfwSwapInterval(0);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
