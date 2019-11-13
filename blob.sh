@@ -11,7 +11,7 @@ if [ "$1" = "--blob" ] && [ -d ${DIR} ]; then
   [ ! -f ${FILE_CRYPT} ] || rm -rf ${FILE_CRYPT}
   tar -czf ${FILE_TAR} ${DIR}
   gpg -c ${FILE_TAR}
-elif [ "$1" = "--deblob" ] && [ -f ${FILE_TAR} ]; then
+elif [ "$1" = "--deblob" ] && [ -f ${FILE_CRYPT} ]; then
   gpg -d ${FILE_CRYPT} > ${FILE_TAR}
   tar -xf ${FILE_TAR}
 fi
