@@ -6,5 +6,4 @@ cgltf
 res/samples
 freetype2
 jsmn
-*.pdf
-*.epub
+blobby
