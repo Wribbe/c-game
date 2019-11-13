@@ -6,7 +6,7 @@ DIR_BIN=bin
 all: ${BINS}
 
 ${DIR_BIN}/% : %.c | ${DIR_BIN}
-	gcc $^ -o $@
+	gcc $^ -g -o $@
 
 ${DIR_BIN} :
 	mkdir $@
