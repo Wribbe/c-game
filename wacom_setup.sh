@@ -22,6 +22,9 @@ for d in $devices; do
   xsetwacom set $d rotate half
 done
 
+
+xsetwacom set $pad Button 13 "key +ctrl s"      # Save document.
+xsetwacom set $pad Button 12 "key X"            # Swap colors.
 xsetwacom set $pad Button 11 "key tab"          # Maximize canvas.
 xsetwacom set $pad Button 10 "key +ctrl z"      # Undo.
 # Touch ring.
