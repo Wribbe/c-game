@@ -22,10 +22,10 @@ for d in $devices; do
   xsetwacom set $d rotate half
 done
 
-xsetwacom set $pad Button 1 "key space"
-xsetwacom set $pad Button 2 "key ctrl"
-xsetwacom set $pad Button 3 "key shift"
-xsetwacom set $pad Button 8 "key +shift +space"
-xsetwacom set $pad Button 9 "key /"
-xsetwacom set $pad Button 10 "key +ctrl z"
-xsetwacom set $pad Button 11 "key tab"
+xsetwacom set $pad Button 11 "key tab"          # Maximize canvas.
+xsetwacom set $pad Button 10 "key +ctrl z"      # Undo.
+# Touch ring.
+xsetwacom set $pad Button 9 "key ctrl"          # Color-pick.
+xsetwacom set $pad Button 8 "key +shift +space" # Rotate.
+xsetwacom set $pad Button 3 "key /"             # Toggle A/B tool.
+xsetwacom set $pad Button 2 "key shift"         # Change cursor.
