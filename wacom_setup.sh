@@ -1,5 +1,12 @@
 #!/bin/sh
 
+
+[ $# -gt 0 ] || { echo "Usage: $0 --desktop/--laptop"; exit -1; }
+
+
+
+[ ! $1 = "--desktop" ] || xsetwacom set "Wacom Intuos4 6x9 Pen stylus" MapToOutput HDMI-A-0
+
 IFS='
 '
 pad="Wacom Intuos4 6x9 Pad pad"
